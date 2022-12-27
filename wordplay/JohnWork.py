@@ -22,15 +22,31 @@ with open('wordnet-data-0.pkl', 'rb') as file:
 this_game_data = game(wordnet_data)
 synsets_by_depth = this_game_data[0]
 lateral_connections = this_game_data[1]
+non_lateral_connections = this_game_data[2]
+start_synset_num = this_game_data[3]
 
 
 
 deepest_depth = len(synsets_by_depth) - 1
-start_synset_num = random.choice(list(synsets_by_depth[deepest_depth]))
+# start_synset_num = random.choice(list(synsets_by_depth[deepest_depth]))
 
 target_synset_num = list(synsets_by_depth[0])[0]  # The only synset contained within the first set in synsets_by_depth.
 
 
+
+
+# print(wordnet_data[12031])
+
+
+def get_depth(current_synset_num):
+    # todo getting depth twice
+    current_synset_depth = deepest_depth + 1
+    for depth in range(deepest_depth + 1):
+        if current_synset_num in synsets_by_depth[depth]:
+            # print('found depth!')
+            current_synset_depth = depth
+            break
+    return current_synset_depth
 
 
 
@@ -39,22 +55,24 @@ def print_synset_info(synset_num, prefix=''):
     # i.e. 2 | throw, chuck | To toss
 
     # print(wordnet_data[synset_num])
-    
-    synset_depth = deepest_depth + 1
-    for depth in range(deepest_depth + 1):
-        if synset_num in synsets_by_depth[depth]:
-            # print('found depth!')
-            synset_depth = depth
-            break
+
+    # todo getting depth twice
+    current_synset_depth = get_depth(synset_num)
+    # current_synset_depth = deepest_depth + 1
+    # for depth in range(deepest_depth + 1):
+    #     if synset_num in synsets_by_depth[depth]:
+    #         # print('found depth!')
+    #         current_synset_depth = depth
+    #         break
 
     # Add depth.
-    print_string = f'{prefix}| dist-{synset_depth} '
+    print_string = f'{prefix}{synset_num} | dist-{current_synset_depth} '
 
     # Add lateral connections.
     if synset_num in lateral_connections:
-        print_string += f'| lat-{len(lateral_connections[synset_num])} '
+        print_string += f'| lat-{len(lateral_connections[synset_num])} | '
     else:
-        print_string += f'| lat-XXX '
+        print_string += f'| lat-XXX | '
 
     # Add all words.
     for word in wordnet_data[synset_num][3]:
@@ -72,13 +90,26 @@ def print_synset_info(synset_num, prefix=''):
     
 
 print('')
-print_synset_info(target_synset_num, 'TARGET: ')
+print_synset_info(target_synset_num, 'TARGET: | ')
 print('')
 
 current_synset_num = start_synset_num
 last_pointer_symbol = None
 
+# First item is the synset id, and the second is the number of connections.
+decoy_synsets = [[None, -1], [None, -1], [None, -1]]  # [lateral, 1_away, >1_away]
+toward_synset = [None, -1]
+
 while True:
+
+    # todo getting depth twice
+    current_synset_depth = get_depth(current_synset_num)
+    # current_synset_depth = deepest_depth + 1
+    # for depth in range(deepest_depth + 1):
+    #     if current_synset_num in synsets_by_depth[depth]:
+    #         # print('found depth!')
+    #         current_synset_depth = depth
+    #         break
 
     print_synset_info(current_synset_num)
     print('')
@@ -90,19 +121,49 @@ while True:
 
         pointer_prefix = '    '
 
+        pointer_synset_id = pointer[1]
+
+        connections = len(wordnet_data[pointer_synset_id][4])  # Number of OUT-pointers.
+
         child_pointer_symbol = pointer[0]
         if child_pointer_symbol in POINTER_TYPES_TO_IGNORE or child_pointer_symbol == '?p':
             pointer_prefix += 'IGNORED '
             # continue  # Ignore specified pointers and word pivots.
+        else:
+            child_depth = get_depth(pointer_synset_id)
+            depth_change = child_depth - current_synset_depth
+            if depth_change < 0:
+                if connections > toward_synset[1]:
+                    toward_synset[0] = pointer_synset_id
+                    toward_synset[1] = connections
+            elif depth_change == 0:
+                if connections > decoy_synsets[0][1]:
+                    decoy_synsets[0][0] = pointer_synset_id
+                    decoy_synsets[0][1] = connections
+            elif depth_change == 1:
+                if connections > decoy_synsets[1][1]:
+                    decoy_synsets[1][0] = pointer_synset_id
+                    decoy_synsets[1][1] = connections
+            else:
+                # depth_change > 1
+                if connections > decoy_synsets[2][1]:
+                    decoy_synsets[2][0] = pointer_synset_id
+                    decoy_synsets[2][1] = connections
 
-        if pointer[0] in POINTER_SEQUENCES_TO_IGNORE:
-            if POINTER_SEQUENCES_TO_IGNORE[child_pointer_symbol] == pointer[0]:
-                pointer_prefix += 'IGNORED '
-                # continue  # Ignore specified pointer type sequences.
+        # if pointer[0] in POINTER_SEQUENCES_TO_IGNORE:
+        #     if POINTER_SEQUENCES_TO_IGNORE[child_pointer_symbol] == pointer[0]:
+        #         pointer_prefix += 'IGNORED '
+        #         # continue  # Ignore specified pointer type sequences.
 
-        pointer_prefix += f'{pointer_num}) {POINTER_SYMBOL_KEY[child_pointer_symbol]["phrase"]} '
-        print_synset_info(pointer[1], pointer_prefix)
+        pointer_prefix += f'{pointer_num}) {POINTER_SYMBOL_KEY[child_pointer_symbol]["phrase"]} | '
+        print_synset_info(pointer_synset_id, pointer_prefix)
         pointer_num += 1
+
+    print_synset_info(toward_synset[0], '    CORRECT: ')
+    for decoy_level in decoy_synsets:
+        if decoy_level[0] is not None:
+            print_synset_info(decoy_level[0], '    DECOY: ')
+            break
 
     next_pointer_index = int(input('    Which synset next? ')) - 1
     print('')
