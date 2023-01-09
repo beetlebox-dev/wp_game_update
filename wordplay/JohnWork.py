@@ -1,7 +1,7 @@
 import pickle
 import random
 from wordplay.manage_database import POINTER_TYPES_TO_IGNORE, POINTER_SEQUENCES_TO_IGNORE, POINTER_SYMBOL_KEY
-from game import game
+from game import game, get_game_tree
 
 
 with open('wordnet-data-0.pkl', 'rb') as file:
@@ -13,25 +13,39 @@ with open('wordnet-data-0.pkl', 'rb') as file:
 # todo: Make synsets_by_depth a tuple.
 
 
-# synsets_by_depth = [{41257}, {41280, 35620, 935}, {43776, 43777, 43778, 43779, 43780, 115338, 37776, 927, 35619, 41256, 936, 41258, 41259, 41260, 41261, 41262, 41263, 35632, 41264, 41265, 41266, 40884, 41267, 41268, 43830, 40886, 41282, 40905, 973, 35951, 105841, 43768, 43769, 43770, 43771, 43772, 43773, 43774, 43775}, {36352, 36353, 36354, 36355, 36356, 36357, 36358, 36359, 36360, 36361, 36362, 36363, 12, 36364, 36365, 36366, 36367, 36368, 36369, 36370, 36371, 36372, 36373, 36374, 36375, 36376, 36377, 36378, 36379, 36380, 36381, 36382, 36384, 36385, 36386, 36387, 36388, 36383, 36389, 36390, 36391, 36392, 36393, 36394, 36395, 36396, 36397, 36398, 36399, 36400, 36401, 36402, 36403, 36404, 36405, 36406, 36407, 36408, 36409, 36410, 36411, 36412, 36413, 36414, 36415, 36416, 36417, 36418, 36419, 36420, 36421, 36422, 36423, 36424, 36425, 36426, 36427, 36428, 36429, 36430, 36431, 36432, 36433, 36434, 36435, 36436, 36437, 36438, 36439, 36440, 36441, 36442, 36443, 36444, 36445, 36446, 36447, 36448, 36449, 36450, 36451, 36452, 36453, 36454, 36455, 36456, 36457, 36458, 36459, 36460, 36461, 36462, 36463, 35953, 36464, 36465, 35950, 92728, 12398, 44086, 44087, 92731, 44088, 106570, 44089, 106568, 44090, 115339, 151, 106569, 673, 40895, 43746, 43748, 36071, 234, 36079, 43781, 43782, 43783, 43784, 43785, 43786, 43787, 43788, 43789, 43790, 43791, 43792, 43793, 43794, 36115, 43795, 43796, 43797, 43798, 43799, 11, 41245, 35621, 35622, 35623, 35624, 2854, 43817, 43828, 41269, 41270, 43829, 41272, 41273, 41274, 41275, 43832, 43831, 43833, 41279, 36160, 41281, 43834, 41283, 41284, 36165, 41285, 41286, 41287, 43848, 43850, 43851, 43852, 43853, 43854, 43855, 43856, 43849, 44085, 117074, 113171, 39776, 41319, 41320, 36207, 44035, 105842, 43835, 44039, 43836, 44040, 43837, 36241, 37778, 36243, 37779, 37780, 37781, 36247, 37777, 43926, 43930, 43931, 43932, 43936, 930, 931, 932, 933, 934, 937, 938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948, 40885, 949, 40887, 40888, 40889, 40890, 101305, 43846, 43956, 43847, 43961, 43962, 43963, 43964, 43965, 43966, 43967, 43968, 43969, 43970, 43971, 43972, 36299, 43973, 40902, 36302, 36304, 43985, 36306, 35798, 35799, 36312, 36313, 36315, 43999, 43960, 43957, 36334, 36337, 36338, 36339, 36340, 36341, 36342, 36343, 36344, 36345, 36346, 36347, 36348, 36349, 36350, 36351}]
+# start_synset_num = 12941
+# synsets_by_depth = [{63805}, {55217, 7235, 63804, 63815}, {5792, 74371, 63813, 114982, 55017, 62666, 7275, 22988, 55821, 62745, 57596, 7230}, {78861, 72720, 72725, 72730, 61980, 53788, 7198, 7199, 7200, 7201, 7202, 7203, 7204, 7205, 7206, 7207, 7208, 7209, 7210, 7211, 7212, 72749, 7213, 7214, 7215, 7216, 7217, 72755, 7218, 7219, 7220, 7221, 7222, 7223, 7224, 7225, 7226, 7227, 7228, 7229, 7231, 7232, 7233, 7234, 7236, 7237, 7238, 7239, 7240, 7241, 7242, 7243, 74828, 7244, 7245, 7246, 7247, 7248, 7249, 7251, 7255, 7256, 42073, 2140, 2151, 77934, 64111, 64112, 64113, 7278, 2160, 2158, 7281, 78973, 56964, 53429, 33983, 74432, 1216, 72932, 76522, 22255, 55550, 102152, 63753, 102153, 13585, 62740, 55578, 13596, 13598, 103200, 103201, 42279, 1321, 64303, 64304, 64305, 64306, 64307, 64308, 64309, 63802, 74557, 41277, 63807, 63806, 55105, 6980, 63814, 76110, 55121, 79194, 79195, 79196, 79197, 79198, 79199, 79200, 79201, 79202, 79203, 79204, 79205, 79206, 79207, 79208, 79209, 79210, 79211, 79212, 79213, 79214, 79215, 79216, 79217, 57716, 73602, 74123, 73623, 50601, 74155, 55218, 55229, 72637, 74685, 39268, 77250, 22987, 76749, 74704, 72661, 74587, 55784}]
 # lateral_connections = {35620: {41257}, 935: {41257}, 41280: {41257}, 41257: {41280, 35620, 935}, 973: {35632}, 35632: {973}, 40886: {41256, 115338, 40884}, 40884: {40886}, 41282: {43830, 35951}, 41256: {43830, 115338, 40886, 35951}, 35951: {41256, 41282}, 41259: {41258}, 41258: {41259}, 43830: {41256, 41282, 43771}, 115338: {41256, 40886}, 927: {936}, 936: {927}, 43771: {43830}}
 # # Example above shows target synset number 0 at depth/index 0.
 # # The sets after that show synset numbers at the depth that corresponds to the set's index.
 
 
-this_game_data = game(wordnet_data)
-synsets_by_depth = this_game_data[0]
+analysis_depth = 5  # start_depth + hp
+start_depth = 3  # DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
+hp = 2  # Gameplay continues until hp is NEGATIVE.
+
+
+this_game_data = game(wordnet_data, analysis_depth, start_depth)
 lateral_connections = this_game_data[1]
 non_lateral_connections = this_game_data[2]
 start_synset_num = this_game_data[3]
+synsets_by_depth = this_game_data[0]
 
+print(f'synsets_by_depth = {synsets_by_depth}\nstart_synset_num = {start_synset_num}')
+# synsets_by_depth = [{7001}, {1882, 106826}, {6661, 35349, 6181, 7029, 7030, 6190, 92721, 6194, 6196, 4680, 6226, 6227, 6230, 6231, 6232, 6236, 91505, 6253, 6254, 6255, 6256, 6259, 6268, 6269, 5247, 6274, 4740, 6277, 6278, 73350, 4747, 2188, 104845, 4753, 117395, 6292, 6296, 5789, 6302, 6306, 103607, 6340, 6345, 4301, 4302, 6388, 4343, 3321, 3322, 6405, 2830, 6419, 113428, 113429, 2857, 4395, 2357, 1854, 106824, 106834, 106835, 106836, 106837, 6998, 6999, 7000, 106838, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 7016, 7017, 7018, 4971, 7019, 7020, 7021, 7022, 7023, 7024, 7025, 7026, 7027, 7028, 4982, 7031, 7032, 7033, 7034, 7035, 7036, 7037, 7038, 7039, 7040, 7041, 7042, 7043, 7044, 7045, 2435, 7046, 7047, 7048, 7049, 7050, 2444, 7051, 7054, 7052, 7053, 7055, 7056, 7057, 7058, 7059, 7060, 7061, 7062, 7063, 7064, 7065, 7066, 7067, 7068, 7069, 7070, 7071, 7072, 7073, 7074, 2473, 1917, 6082, 2523, 2531, 2540, 3055, 6132, 6134, 6137, 6138, 3582}, {6159, 36882, 6182, 6183, 6184, 24615, 6186, 41003, 108582, 108588, 6191, 6192, 6193, 34864, 77876, 6197, 6198, 6199, 6200, 6201, 6202, 6203, 6204, 6205, 6206, 4150, 6214, 4169, 6223, 57424, 6229, 6233, 6234, 6235, 6238, 10337, 6243, 10340, 4202, 6252, 4208, 6257, 6258, 6260, 6270, 6271, 6272, 6273, 24705, 6279, 6280, 6281, 6282, 6283, 4237, 6293, 6297, 6298, 6299, 6300, 6301, 32923, 2207, 2208, 2209, 2210, 2211, 6303, 6304, 4263, 73895, 28845, 4285, 4289, 57538, 6342, 4295, 4298, 90315, 4300, 6358, 6367, 4337, 24829, 6398, 24832, 6402, 4355, 6403, 6404, 6406, 6407, 6418, 2341, 4389, 4391, 2345, 24885, 2358, 2373, 4423, 6473, 51530, 106827, 106828, 106829, 106830, 24911, 4432, 4433, 4434, 24912, 24913, 106831, 106832, 106833, 108884, 12649, 2417, 6516, 110965, 110966, 110967, 110968, 110969, 2433, 6532, 6537, 2443, 4149, 6549, 6550, 12706, 2474, 4529, 6590, 6599, 41419, 6618, 2522, 6620, 23008, 2530, 6630, 27112, 2536, 23018, 2539, 2541, 2546, 6648, 513, 88581, 35338, 104972, 6676, 6677, 4629, 37406, 6689, 35363, 4674, 8772, 8773, 8774, 8775, 8776, 8777, 8778, 8779, 8780, 8781, 8782, 8783, 8784, 8785, 8786, 78411, 39504, 4738, 4741, 4742, 4746, 8861, 92843, 4782, 6832, 6833, 6834, 6835, 25268, 117424, 107217, 31466, 31468, 2813, 4862, 74505, 74506, 74507, 74508, 58125, 74509, 76571, 2856, 25387, 56108, 2869, 64072, 13146, 4962, 4966, 4973, 106825, 45952, 72578, 58268, 58280, 58281, 23465, 23466, 58284, 58302, 23504, 3038, 3044, 70632, 76784, 1009, 3061, 115725, 33846, 72768, 11335, 3166, 25695, 5228, 9345, 103555, 78984, 76966, 76970, 7342, 1216, 103620, 103621, 11473, 34009, 34011, 74979, 7398, 7399, 7400, 7401, 7402, 72941, 3318, 34076, 1348, 91504, 1393, 79224, 79235, 23950, 101797, 1457, 1458, 36275, 1460, 7605, 36274, 36280, 34235, 32209, 26084, 26086, 9722, 1532, 1533, 1552, 1556, 77332, 99866, 99867, 1565, 3648, 63043, 34381, 5717, 75359, 63081, 63082, 79468, 34416, 79473, 40582, 79495, 34441, 73356, 73365, 73366, 73367, 5801, 5803, 1741, 71389, 71396, 1794, 32922, 12049, 73495, 12069, 75565, 73544, 73552, 3948, 1908, 12152, 102265, 102269, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 73617, 73618, 10140, 6047, 71617, 4050, 34781, 6133, 6135, 6136, 6139, 6140, 6141, 6142, 6143}]
+# start_synset_num = 4208
+
+game_tree = get_game_tree(wordnet_data, synsets_by_depth, start_synset_num, start_depth, hp)
+print(f'game_tree = {game_tree}')
+print(f'size of tree: {len(game_tree)}')
 
 
 deepest_depth = len(synsets_by_depth) - 1
+print(deepest_depth)
 # start_synset_num = random.choice(list(synsets_by_depth[deepest_depth]))
 
 target_synset_num = list(synsets_by_depth[0])[0]  # The only synset contained within the first set in synsets_by_depth.
-
+print(f'target_synset_num: {target_synset_num}')
 
 
 
@@ -40,7 +54,8 @@ target_synset_num = list(synsets_by_depth[0])[0]  # The only synset contained wi
 
 def get_depth(current_synset_num):
     # todo getting depth twice
-    current_synset_depth = deepest_depth + 1
+    # current_synset_depth = deepest_depth + 1
+    current_synset_depth = 9999
     for depth in range(deepest_depth + 1):
         if current_synset_num in synsets_by_depth[depth]:
             # print('found depth!')
@@ -96,14 +111,24 @@ print('')
 current_synset_num = start_synset_num
 last_pointer_symbol = None
 
-# First item is the synset id, and the second is the number of connections.
-decoy_synsets = [[None, -1], [None, -1], [None, -1]]  # [lateral, 1_away, >1_away]
-toward_synset = [None, -1]
+visit_order = {}
+visit_number = 0
+
+# todo if both synsets haven't been visited, go to the one that hasn't been shown as a pointer yet.
 
 while True:
 
+    visit_number += 1
+
+    visit_order[current_synset_num] = visit_number
+
+    # # First item is the pointer, and the second is the number of connections.
+    # decoy_synsets = [[None, -1], [None, -1], [None, -1]]  # [lateral, ==1_away, >1_away]
+    # toward_synset = [None, -1]
+
     # todo getting depth twice
     current_synset_depth = get_depth(current_synset_num)
+    # print(f'current depth: {current_synset_depth}')
     # current_synset_depth = deepest_depth + 1
     # for depth in range(deepest_depth + 1):
     #     if current_synset_num in synsets_by_depth[depth]:
@@ -111,7 +136,7 @@ while True:
     #         current_synset_depth = depth
     #         break
 
-    print_synset_info(current_synset_num)
+    print_synset_info(current_synset_num, 'CURRENT: | ')
     print('')
 
     pointer_num = 1
@@ -123,52 +148,77 @@ while True:
 
         pointer_synset_id = pointer[1]
 
-        connections = len(wordnet_data[pointer_synset_id][4])  # Number of OUT-pointers.
+        # connections = len(wordnet_data[pointer_synset_id][4])  # Number of OUT-pointers.
 
         child_pointer_symbol = pointer[0]
         if child_pointer_symbol in POINTER_TYPES_TO_IGNORE or child_pointer_symbol == '?p':
             pointer_prefix += 'IGNORED '
-            # continue  # Ignore specified pointers and word pivots.
-        else:
-            child_depth = get_depth(pointer_synset_id)
-            depth_change = child_depth - current_synset_depth
-            if depth_change < 0:
-                if connections > toward_synset[1]:
-                    toward_synset[0] = pointer_synset_id
-                    toward_synset[1] = connections
-            elif depth_change == 0:
-                if connections > decoy_synsets[0][1]:
-                    decoy_synsets[0][0] = pointer_synset_id
-                    decoy_synsets[0][1] = connections
-            elif depth_change == 1:
-                if connections > decoy_synsets[1][1]:
-                    decoy_synsets[1][0] = pointer_synset_id
-                    decoy_synsets[1][1] = connections
-            else:
-                # depth_change > 1
-                if connections > decoy_synsets[2][1]:
-                    decoy_synsets[2][0] = pointer_synset_id
-                    decoy_synsets[2][1] = connections
-
-        # if pointer[0] in POINTER_SEQUENCES_TO_IGNORE:
-        #     if POINTER_SEQUENCES_TO_IGNORE[child_pointer_symbol] == pointer[0]:
-        #         pointer_prefix += 'IGNORED '
-        #         # continue  # Ignore specified pointer type sequences.
-
         pointer_prefix += f'{pointer_num}) {POINTER_SYMBOL_KEY[child_pointer_symbol]["phrase"]} | '
         print_synset_info(pointer_synset_id, pointer_prefix)
         pointer_num += 1
 
-    print_synset_info(toward_synset[0], '    CORRECT: ')
-    for decoy_level in decoy_synsets:
-        if decoy_level[0] is not None:
-            print_synset_info(decoy_level[0], '    DECOY: ')
-            break
-
-    next_pointer_index = int(input('    Which synset next? ')) - 1
     print('')
-    
-    current_synset_num = wordnet_data[current_synset_num][4][next_pointer_index][1]
+    print_synset_info(target_synset_num, 'TARGET: | ')
+    print_synset_info(current_synset_num, 'CURRENT: | ')
+    print('')
+
+    # correct_pointers = game_tree[current_synset_num]['correct']
+    # decoy_pointers = game_tree[current_synset_num]['decoy']
+
+
+
+    for pointers_group in ['correct', 'decoy']:
+        ptr_grp = game_tree[current_synset_num][pointers_group]
+
+        oldest_order = 99999  # todo use infinity?
+        chosen_pointer_id = None
+
+        for pointer_id in ptr_grp:
+            if pointer_id not in visit_order:
+                this_order = -1
+            else:
+                this_order = visit_order[pointer_id]
+            if this_order < oldest_order:
+                oldest_order = this_order
+                chosen_pointer_id = pointer_id
+
+        if chosen_pointer_id is None:
+            print(f'No {pointers_group} pointers!')
+        else:
+            print(f'Visit number: {visit_number} | Oldest order: {oldest_order} | Chosen id: {chosen_pointer_id}')
+            pointer = ptr_grp[chosen_pointer_id]
+            pointer_symbol = pointer['symbol']
+            prefix = f'    {pointers_group.upper()}: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
+            print_synset_info(chosen_pointer_id, prefix)
+
+        for option_pointer_id in ptr_grp:
+            pointer = ptr_grp[option_pointer_id]
+            pointer_symbol = pointer['symbol']
+            prefix = f'    {pointers_group.upper()}opt: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
+            print_synset_info(option_pointer_id, prefix)
+
+    print('')
+
+    # print_synset_info(toward_synset[0][1], f'    CORRECT: {POINTER_SYMBOL_KEY[toward_synset[0][0]]["phrase"]} | ')
+    # decoy_synset = None
+    # for decoy_level in decoy_synsets:
+    #     if decoy_level[0] is not None:
+    #         decoy_synset = decoy_level[0][1]
+    #         print_synset_info(decoy_synset, f'    DECOY: {POINTER_SYMBOL_KEY[decoy_level[0][0]]["phrase"]} | ')
+    #         break
+
+    user_response = input('    Which synset next? ')
+    print('')
+
+    current_synset_num = int(user_response)
+
+    # if user_response == 'a':
+    #     current_synset_num = toward_synset[0][1]
+    # elif user_response == 'b':
+    #     current_synset_num = decoy_synset[1]
+    # else:
+    #     next_pointer_index = int(user_response) - 1
+    #     current_synset_num = wordnet_data[current_synset_num][4][next_pointer_index][1]
 
 
 

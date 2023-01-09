@@ -18,7 +18,7 @@ def hsv_to_hsl(hsv):
     return h * 360, s * 100, l * 100
 
 
-def get_game_data(wordnet_data, target_synset_id, depth):
+def get_game_data(wordnet_data, target_synset_id, analysis_depth, start_depth):
     """Returns list: [synsets_by_depth, lateral_connections]
 
 Returns a "tree", or a list of recursively nested lists encoding various paths from start to end synsets.
@@ -42,17 +42,22 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
     # lateral_connections = {}
 
     # synsets_this_depth = set()
-    synsets_this_depth = visited_synsets
+    # synsets_this_depth = visited_synsets
 
-    for _ in range(depth):  # Each loop is one layer in a breadth-first search.
+    # print(f'DEPTH: {depth}')
+
+    for n in range(analysis_depth):  # Each loop is one layer in a breadth-first search.
+
+        # print(f'current depth: {n}')
+        # print(synsets_by_depth)
 
         # visited_synsets_this_depth = set()
 
-        synsets_prev_depth = synsets_this_depth
+        # synsets_prev_depth = synsets_this_depth
         synsets_this_depth = set()
 
-        print(path_memory[-1])
-        print(synsets_prev_depth)
+        # print(path_memory[-1])
+        # print(synsets_prev_depth)
 
         # next_generation = []
         sibling_group = []
@@ -81,9 +86,10 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                 if child_pointer_id not in visited_synsets:
                     synsets_this_depth.add(child_pointer_id)
                     sibling_group.append(child_pointer)
+                    visited_synsets.add(child_pointer_id)
 
                 # Add pointer to visited_synsets.
-                visited_synsets.add(child_pointer_id)
+                # visited_synsets.add(child_pointer_id)
                 # visited_synsets_this_depth.add(child_pointer_id)
 
                 # # Tally lateral connections "IN".
@@ -165,13 +171,19 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                     else:
                         non_lateral_connections[synset_num] = {child_pointer_id, }
 
+
+    print('#############')
+    print(synsets_by_depth)
+    print(analysis_depth)
+    print('#############')
+
     # Select start synset id
     # deepest_depth = len(synsets_by_depth) - 1
     best_start_synset_id = None
     best_start_synset_connection_count = -1
     for _ in range(10):  # Finds best lateral connections at greatest depth/distance from target out of 10 random ones.
 
-        rand_start_synset = random.choice(list(synsets_by_depth[-1]))
+        rand_start_synset = random.choice(list(synsets_by_depth[start_depth]))
 
         connection_count = len(wordnet_data[rand_start_synset][4])
         if connection_count > best_start_synset_connection_count:
@@ -187,11 +199,163 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
         #     best_start_synset_id = rand_start_synset
         #     best_start_synset_connection_count = num_lat_connections
 
-    print(f'Start Connections: {best_start_synset_connection_count}')
+    # print(f'Start Connections: {best_start_synset_connection_count}')
 
     return synsets_by_depth, lateral_connections_new, non_lateral_connections, best_start_synset_id
 
     # return synsets_by_depth, lateral_connections
+
+
+
+
+def get_game_tree(wordnet_data, synsets_by_depth, start_synset_id, dist_from_target, hp):
+    """Returns list: [synsets_by_depth, lateral_connections]
+
+Returns a "tree", or a list of recursively nested lists encoding various paths from start to end synsets.
+
+Start_word should be lower case, and spaces should be replaced with underscores.
+
+Returns dictionary with keys "status" and "data". Status can be "ok" or "error".
+If status is ok, data is path_memory tree. If status is error, data is a string describing the error.
+
+TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_index]
+    DIRECTION: Always 0. Vestigial from find_connection, and needed to be compatible with other functions.
+    GENERATION: 0 is the first/oldest generation where branching begins at start and end synsets.
+    -1 is last/newest generation where connecting synsets are found in common for both directions.
+    SIBLING GROUP INDEX: Index of sibling group, containing pointers from the same parent synset in previous generation.
+    SIBLING_INDEX: Index of pointer within sibling group."""
+
+    def get_depth(synset_num):
+        deepest_depth = len(synsets_by_depth) - 1
+        # print('TESTING!!!!!!!!')
+        # print(f'synset num: {synset_num}')
+        # print(f'deepest depth: {deepest_depth}')
+        synset_depth = 9999  # If depth not found, return this which makes obvious that the depth is larger than the depth of the data.
+        # synset_depth = deepest_depth + 1
+        for search_depth in range(deepest_depth + 1):
+            if synset_num in synsets_by_depth[search_depth]:
+                synset_depth = search_depth
+                break
+        # print(f'synset depth: {synset_depth}')
+        # print('endtest')
+        # print(f'synset_num: {synset_num} | synset_depth: {synset_depth}')
+        return synset_depth
+
+
+
+
+
+    # target_synset_id = list(synsets_by_depth[0])[0]  # The only synset contained within the first set in synsets_by_depth.
+
+    tree = {start_synset_id: {'depth': dist_from_target, 'in': set(), 'correct': {}, 'decoy': {}, }, }
+    current_out_pointers_missing_in_tree = {start_synset_id, }
+
+    max_iters = hp * 2 + dist_from_target  # A maximum possible round length
+    # where each hp lost moves the player a distance of 1 further away from the target,
+    # and all but one hp is used 1 distance away from the target before the round is terminated.
+
+    print(f'max iters: {max_iters}')
+
+    for _ in range(max_iters):  # Each loop is one layer in a breadth-first search.
+
+        # synsets_this_depth = set()
+        # sibling_group = []
+
+        next_out_pointers_missing_in_tree = set()
+
+        for parent_synset_id in current_out_pointers_missing_in_tree:
+
+            correct_pointers = [{'id': None, 'sort_value': None}, {'id': None, 'sort_value': None}]
+            decoy_pointers = [{'id': None, 'sort_value': None}, {'id': None, 'sort_value': None}]
+            # Sort by distance from target (prioritize closer), then by in_tree, then by connections.
+            # sort_value = depth_change * 2000 + in_tree * 1000 + connections
+            # Assumes: max number of connections possible < 1000.
+
+            parent_depth = get_depth(parent_synset_id)
+
+            for child_pointer in wordnet_data[parent_synset_id][4]:  # "Out" pointers FROM parent_synset_id.
+
+                child_pointer_symbol = child_pointer[0]
+                if child_pointer_symbol in POINTER_TYPES_TO_IGNORE or child_pointer_symbol == '?p':
+                    continue  # Ignore specified pointers and word pivots.
+
+                child_pointer_id = child_pointer[1]
+
+                child_depth = get_depth(child_pointer_id)
+                # print(f'child_pointer_id: {child_pointer_id} | child_depth: {child_depth}')
+                depth_change = parent_depth - child_depth  # depth_change=1 is getting 1 closer to target.
+                # Or a distance DECREASE of 1.
+
+                sort_value = depth_change * 2000
+
+                if child_pointer_id in tree:
+                    sort_value += 1000
+
+                num_connections = len(wordnet_data[child_pointer_id][4])
+                sort_value += num_connections
+
+                if depth_change > 0:
+                    pointer_group = correct_pointers
+                else:
+                    pointer_group = decoy_pointers
+
+                # print(f'parent: {parent_synset_id} | child: {child_pointer_id} | sort_value: {sort_value}')
+
+                for index in range(2):
+                    if pointer_group[index]['sort_value'] is None or pointer_group[index]['sort_value'] < sort_value:
+                        child_pointer_symbol = child_pointer[0]
+                        trump_pointer = {'id': child_pointer_id, 'sort_value': sort_value, 'symbol': child_pointer_symbol}
+                        pointer_group.insert(index, trump_pointer)
+                        del pointer_group[2]
+                        break
+
+            for pointer in correct_pointers:
+                if pointer['sort_value'] is not None:
+                    child_synset_id = pointer['id']
+                    tree[parent_synset_id]['correct'][child_synset_id] = pointer
+                    if child_synset_id in tree:
+                        tree[child_synset_id]['in'].add(parent_synset_id)
+                    else:
+                        child_depth = get_depth(child_synset_id)
+                        tree[child_synset_id] = {'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {}, }
+                        next_out_pointers_missing_in_tree.add(child_synset_id)
+            # todo can do above and below at once. combine both lists into dicts. iter through ['correct', 'decoy']
+            for pointer in decoy_pointers:
+                if pointer['sort_value'] is not None:
+                    child_synset_id = pointer['id']
+                    tree[parent_synset_id]['decoy'][child_synset_id] = pointer
+                    if child_synset_id in tree:
+                        tree[child_synset_id]['in'].add(parent_synset_id)
+                    else:
+                        child_depth = get_depth(child_synset_id)
+                        tree[child_synset_id] = {'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {}, }
+                        next_out_pointers_missing_in_tree.add(child_synset_id)
+
+            # print(f'decoy pointers: {decoy_pointers}')
+
+            if parent_synset_id == 55017:
+                print('debug!!!!!!!!')
+                print(f'depth: {parent_depth}')
+                print(wordnet_data[parent_synset_id][4])
+                print(correct_pointers)
+                print(decoy_pointers)
+                print('debug!!!!!!!!')
+
+
+        if len(next_out_pointers_missing_in_tree) > 0:
+            current_out_pointers_missing_in_tree = next_out_pointers_missing_in_tree
+        else:
+            # print(f'break')
+            # print(next_out_pointers_missing_in_tree)
+            break
+
+    return tree
+
+
+
+
+
+
 
 
 def random_main_group_synset(wordnet_data):
@@ -221,13 +385,16 @@ def rand_synset_max_connections(wordnet_data, samples=10):
     return best_synset_id
 
 
-def game(wordnet_data):
-    rand_synset_id = rand_synset_max_connections(wordnet_data)
+def game(wordnet_data, analysis_depth, start_depth, target=None):
+    if target is None:
+        rand_synset_id = rand_synset_max_connections(wordnet_data)
+    else:
+        rand_synset_id = target
     # rand_synset_id = random_main_group_synset(wordnet_data)
-    game_data = get_game_data(wordnet_data, rand_synset_id, 3)
-    print(f'\nsynsets_by_depth = {game_data[0]}')
-    print(f'lateral_connections = {game_data[1]}')
-    print(f'non_lateral_connections = {game_data[2]}')
+    game_data = get_game_data(wordnet_data, rand_synset_id, analysis_depth, start_depth)
+    # print(f'\nsynsets_by_depth = {game_data[0]}')
+    # print(f'lateral_connections = {game_data[1]}')
+    # print(f'non_lateral_connections = {game_data[2]}')
     return game_data
 
 
