@@ -208,6 +208,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
 
 
 
+# todo on average 350 characters per tree item, or 280 bytes.
 def get_game_tree(wordnet_data, synsets_by_depth, start_synset_id, dist_from_target, hp):
     """Returns list: [synsets_by_depth, lateral_connections]
 
@@ -244,11 +245,16 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
 
 
 
-
     # target_synset_id = list(synsets_by_depth[0])[0]  # The only synset contained within the first set in synsets_by_depth.
 
-    tree = {start_synset_id: {'depth': dist_from_target, 'in': set(), 'correct': {}, 'decoy': {}, }, }
+    tree = {start_synset_id: {
+        'depth': dist_from_target, 'in': set(), 'correct': {}, 'decoy': {}, 'words': wordnet_data[start_synset_id][3],
+        'pos': wordnet_data[start_synset_id][1], 'gloss': wordnet_data[start_synset_id][2]
+    }}
     current_out_pointers_missing_in_tree = {start_synset_id, }
+
+    new_index_by_wordnet_index = {start_synset_id: 0}
+
 
     max_iters = hp * 2 + dist_from_target  # A maximum possible round length
     # where each hp lost moves the player a distance of 1 further away from the target,
@@ -312,35 +318,43 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             for pointer in correct_pointers:
                 if pointer['sort_value'] is not None:
                     child_synset_id = pointer['id']
-                    tree[parent_synset_id]['correct'][child_synset_id] = pointer
+                    tree[parent_synset_id]['correct'][child_synset_id] = pointer['symbol']
+                    # tree_entry = {'symbol': pointer['symbol']}
+                    # tree[parent_synset_id]['correct'][child_synset_id] = tree_entry
+                    # tree[parent_synset_id]['correct'][child_synset_id] = pointer
                     if child_synset_id in tree:
                         tree[child_synset_id]['in'].add(parent_synset_id)
                     else:
                         child_depth = get_depth(child_synset_id)
-                        tree[child_synset_id] = {'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {}, }
+                        new_index_by_wordnet_index[child_synset_id] = len(new_index_by_wordnet_index)
+                        tree[child_synset_id] = {
+                            'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {},
+                            'pos': wordnet_data[child_synset_id][1], 'gloss': wordnet_data[child_synset_id][2],
+                            'words': wordnet_data[child_synset_id][3]
+                        }
                         next_out_pointers_missing_in_tree.add(child_synset_id)
             # todo can do above and below at once. combine both lists into dicts. iter through ['correct', 'decoy']
             for pointer in decoy_pointers:
                 if pointer['sort_value'] is not None:
                     child_synset_id = pointer['id']
-                    tree[parent_synset_id]['decoy'][child_synset_id] = pointer
+                    tree[parent_synset_id]['decoy'][child_synset_id] = pointer['symbol']
+                    # tree_entry = {'symbol': pointer['symbol']}
+                    # tree[parent_synset_id]['decoy'][child_synset_id] = tree_entry
+                    # tree[parent_synset_id]['decoy'][child_synset_id] = pointer
                     if child_synset_id in tree:
                         tree[child_synset_id]['in'].add(parent_synset_id)
                     else:
                         child_depth = get_depth(child_synset_id)
-                        tree[child_synset_id] = {'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {}, }
+                        new_index_by_wordnet_index[child_synset_id] = len(new_index_by_wordnet_index)
+                        tree[child_synset_id] = {
+                            'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {},
+                            'pos': wordnet_data[child_synset_id][1], 'gloss': wordnet_data[child_synset_id][2],
+                            'words': wordnet_data[child_synset_id][3]
+                        }
+                        # tree[child_synset_id] = {'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {}, }
                         next_out_pointers_missing_in_tree.add(child_synset_id)
 
             # print(f'decoy pointers: {decoy_pointers}')
-
-            if parent_synset_id == 55017:
-                print('debug!!!!!!!!')
-                print(f'depth: {parent_depth}')
-                print(wordnet_data[parent_synset_id][4])
-                print(correct_pointers)
-                print(decoy_pointers)
-                print('debug!!!!!!!!')
-
 
         if len(next_out_pointers_missing_in_tree) > 0:
             current_out_pointers_missing_in_tree = next_out_pointers_missing_in_tree
@@ -349,7 +363,70 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             # print(next_out_pointers_missing_in_tree)
             break
 
-    return tree
+    # condensed_tree = []
+    condensed_tree = [None for _ in range(len(tree))]
+    # todo working here!!!!!!!!!! new index from old
+    for wordnet_synset_id in new_index_by_wordnet_index:
+
+        new_index = new_index_by_wordnet_index[wordnet_synset_id]
+
+        old_correct = tree[wordnet_synset_id]['correct']
+        new_correct = {}
+        for wn_synset_id in old_correct:
+            new_id = new_index_by_wordnet_index[wn_synset_id]
+            symbol = old_correct[wn_synset_id]
+            new_correct[new_id] = symbol
+
+        old_decoy = tree[wordnet_synset_id]['decoy']
+        new_decoy = {}
+        for wn_synset_id in old_decoy:
+            new_id = new_index_by_wordnet_index[wn_synset_id]
+            symbol = old_decoy[wn_synset_id]
+            new_decoy[new_id] = symbol
+
+        new_branch = [
+            new_correct,
+            new_decoy,
+            list(tree[wordnet_synset_id]['words']),
+            tree[wordnet_synset_id]['pos'],
+            tree[wordnet_synset_id]['gloss'],
+        ]
+        condensed_tree[new_index] = new_branch
+
+    for item in condensed_tree:
+        if item is None:
+            'None in condensed tree'
+            exit()
+    print(f'{len(condensed_tree)} - {len(tree)}')
+    synsets_by_depth_total_length = 0
+    for depth in synsets_by_depth:
+        print(f'synsets at depth: {len(depth)}')
+        synsets_by_depth_total_length += len(depth)
+    print(f'total synsets_by_depth items: {synsets_by_depth_total_length}')
+
+    new_synsets_by_depth = []
+    print(synsets_by_depth)
+    print(new_index_by_wordnet_index)
+    depth = -1  # todo debug only
+    for old_depth_layer in synsets_by_depth:
+        depth += 1
+        new_depth_layer = set()
+        for wn_synset_id in old_depth_layer:
+            # if wn_synset_id in new_index_by_wordnet_index:
+            if wn_synset_id in tree:
+                new_synset_index = new_index_by_wordnet_index[wn_synset_id]
+                if new_synset_index > len(condensed_tree) - 1:
+                    raise Exception('Condensed tree appears incomplete!')
+                new_depth_layer.add(new_synset_index)
+            # Else, ok because most synsets in full depth search are not in tree.
+        new_synsets_by_depth.append(new_depth_layer)
+
+    print(f'synsets_by_depth: {synsets_by_depth}')
+    print(f'new_synsets_by_depth: {new_synsets_by_depth}')
+
+    new_start_synset_id = new_index_by_wordnet_index[start_synset_id]
+
+    return condensed_tree, new_synsets_by_depth, new_start_synset_id
 
 
 
