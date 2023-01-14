@@ -242,14 +242,13 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
         # print(f'synset_num: {synset_num} | synset_depth: {synset_depth}')
         return synset_depth
 
-
-
+    # todo no pointers for current_hp<1 or current_depth<2 or current_depth>=depth+hp
 
     # target_synset_id = list(synsets_by_depth[0])[0]  # The only synset contained within the first set in synsets_by_depth.
 
     tree = {start_synset_id: {
         'depth': dist_from_target, 'in': set(), 'correct': {}, 'decoy': {}, 'words': wordnet_data[start_synset_id][3],
-        'pos': wordnet_data[start_synset_id][1], 'gloss': wordnet_data[start_synset_id][2]
+        'pos': wordnet_data[start_synset_id][1], 'gloss': wordnet_data[start_synset_id][2], 'hp': hp,
     }}
     current_out_pointers_missing_in_tree = {start_synset_id, }
 
@@ -262,7 +261,8 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
 
     print(f'max iters: {max_iters}')
 
-    for _ in range(max_iters):  # Each loop is one layer in a breadth-first search.
+    while True:
+    # for _ in range(max_iters):  # Each loop is one layer in a breadth-first search.
 
         # synsets_this_depth = set()
         # sibling_group = []
@@ -322,8 +322,15 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                     # tree_entry = {'symbol': pointer['symbol']}
                     # tree[parent_synset_id]['correct'][child_synset_id] = tree_entry
                     # tree[parent_synset_id]['correct'][child_synset_id] = pointer
+
+                    new_child_hp = tree[parent_synset_id]['hp']  # HP remains the same after a correct choice.
+
                     if child_synset_id in tree:
                         tree[child_synset_id]['in'].add(parent_synset_id)
+                        if new_child_hp > tree[child_synset_id]['hp']:  # todo working here !@#$!@#$
+                            # Retain highest possible hp for this node.
+                            tree[child_synset_id]['hp'] = new_child_hp
+
                     else:
                         child_depth = get_depth(child_synset_id)
                         new_index_by_wordnet_index[child_synset_id] = len(new_index_by_wordnet_index)

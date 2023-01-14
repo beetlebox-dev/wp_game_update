@@ -23,9 +23,9 @@ with open('wordnet-data-0.pkl', 'rb') as file:
 # # The sets after that show synset numbers at the depth that corresponds to the set's index.
 
 
-analysis_depth = 5  # start_depth + hp
-start_depth = 3  # DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
-hp = 2  # Gameplay continues until hp is NEGATIVE.
+start_depth = 2  # > 1 | DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
+hp = 2  # > 0 | Gameplay continues until hp is 0.
+analysis_depth = 3  # start_depth + hp - 1
 
 
 this_game_data = game(wordnet_data, analysis_depth, start_depth)
@@ -120,8 +120,6 @@ last_pointer_symbol = None
 
 visit_order = {}
 visit_number = 0
-
-# todo if both synsets haven't been visited, go to the one that hasn't been shown as a pointer yet.
 
 while True:
 
