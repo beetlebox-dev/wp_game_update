@@ -5,9 +5,13 @@ import wordplay.manage_database as manage_database
 from copy import deepcopy
 
 POINTER_SYMBOL_KEY = manage_database.POINTER_SYMBOL_KEY
-POINTER_TYPES_TO_IGNORE = manage_database.POINTER_TYPES_TO_IGNORE
-IGNORE_ANTONYMS = manage_database.IGNORE_ANTONYMS
-POINTER_SEQUENCES_TO_IGNORE = manage_database.POINTER_SEQUENCES_TO_IGNORE
+# POINTER_TYPES_TO_IGNORE = manage_database.POINTER_TYPES_TO_IGNORE
+
+POINTER_TYPES_TO_IGNORE = {';u', '-u', '<', '<x', '!', '?p'}
+# usage domains/members, adjective/verb derivations, antonyms, word pivots
+
+# IGNORE_ANTONYMS = manage_database.IGNORE_ANTONYMS
+# POINTER_SEQUENCES_TO_IGNORE = manage_database.POINTER_SEQUENCES_TO_IGNORE
 
 
 def hsv_to_hsl(hsv):
@@ -73,7 +77,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             for child_pointer in wordnet_data[parent_synset_id][5]:  # "In" pointers TO parent_synset_id.
 
                 child_pointer_symbol = child_pointer[0]
-                if child_pointer_symbol in POINTER_TYPES_TO_IGNORE or child_pointer_symbol == '?p':
+                if child_pointer_symbol in POINTER_TYPES_TO_IGNORE:
                     continue  # Ignore specified pointers and word pivots.
 
                 # if child_pointer_symbol in POINTER_SEQUENCES_TO_IGNORE:
@@ -151,7 +155,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             for child_pointer in wordnet_data[synset_num][4]:  # "In" pointers TO parent_synset_id.
 
                 child_pointer_symbol = child_pointer[0]
-                if child_pointer_symbol in POINTER_TYPES_TO_IGNORE or child_pointer_symbol == '?p':
+                if child_pointer_symbol in POINTER_TYPES_TO_IGNORE:
                     continue  # Ignore specified pointers and word pivots.
 
                 child_pointer_id = child_pointer[1]
@@ -166,11 +170,6 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                         non_lateral_connections[synset_num].add(child_pointer_id)
                     else:
                         non_lateral_connections[synset_num] = {child_pointer_id, }
-
-    print('#############')
-    print(synsets_by_depth)
-    print(analysis_depth)
-    print('#############')
 
     # Select start synset id
     # deepest_depth = len(synsets_by_depth) - 1
@@ -243,21 +242,21 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
         start_synset_id: {
             'depth': dist_from_target, 'in': set(), 'correct': {}, 'decoy': {},
             'words': wordnet_data[start_synset_id][3], 'pos': wordnet_data[start_synset_id][1],
-            'gloss': wordnet_data[start_synset_id][2], 'hp': hp,
+            'gloss': wordnet_data[start_synset_id][2], 'hp': hp, 'pointers_gathered': False,
         },
         target_synset_id: {
-            'depth': 0, 'in': set(),
+            'depth': 0, 'in': set(), 'correct': {}, 'decoy': {},
             'words': wordnet_data[target_synset_id][3], 'pos': wordnet_data[target_synset_id][1],
-            'gloss': wordnet_data[target_synset_id][2],
-            # Correct, decoy, and hp will not be used at target.
+            'gloss': wordnet_data[target_synset_id][2], 'pointers_gathered': True,
+            # Correct, decoy, and hp will not be used at target, and pointers will not be gathered.
         },
     }
 
-    current_correct_out_pointers_missing_in_tree = {start_synset_id, }
+    current_out_pointers_missing_in_tree = {start_synset_id, }
     next_decoy_out_pointers_missing_in_tree = set()
     current_hp = hp
 
-    new_index_by_wordnet_index = {start_synset_id: 0}
+    new_index_by_wordnet_index = {start_synset_id: 0, target_synset_id: 1}
 
     # max_iters = hp * 2 + dist_from_target  # A maximum possible round length
     # # where each hp lost moves the player a distance of 1 further away from the target,
@@ -265,6 +264,10 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
     # print(f'max iters: {max_iters}')
 
     while True:
+
+        if current_hp < 1:
+            # Redundant. Should not be needed. No further decoy pointers are added when current_hp drops below 1.
+            break
         # Loops through all correct pointers to find all synsets at current_hp.
 
         # for _ in range(max_iters):  # Each loop is one layer in a breadth-first search.
@@ -274,7 +277,13 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
 
         next_correct_out_pointers_missing_in_tree = set()
 
-        for parent_synset_id in current_correct_out_pointers_missing_in_tree:
+        for parent_synset_id in current_out_pointers_missing_in_tree:
+
+            if parent_synset_id in tree and tree[parent_synset_id]['pointers_gathered']:
+                # TODO always in tree????
+                continue
+
+            tree[parent_synset_id]['pointers_gathered'] = True
 
             correct_pointers = [{'id': None, 'sort_value': None}, {'id': None, 'sort_value': None}]
             decoy_pointers = [{'id': None, 'sort_value': None}, {'id': None, 'sort_value': None}]
@@ -287,12 +296,13 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             for child_pointer in wordnet_data[parent_synset_id][4]:  # "Out" pointers FROM parent_synset_id.
 
                 child_pointer_symbol = child_pointer[0]
-                if child_pointer_symbol in POINTER_TYPES_TO_IGNORE or child_pointer_symbol == '?p':
+                if child_pointer_symbol in POINTER_TYPES_TO_IGNORE:
                     continue  # Ignore specified pointers and word pivots.
 
                 child_pointer_id = child_pointer[1]
 
                 child_depth = get_depth(child_pointer_id)  # todo no need to continue beyond depth 1.
+
                 # print(f'child_pointer_id: {child_pointer_id} | child_depth: {child_depth}')
                 depth_change = parent_depth - child_depth  # depth_change=1 means getting 1 degree CLOSER to target.
                 # Or a distance DECREASE of 1.
@@ -331,7 +341,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                         tree[child_synset_id] = {
                             'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {},
                             'pos': wordnet_data[child_synset_id][1], 'gloss': wordnet_data[child_synset_id][2],
-                            'words': wordnet_data[child_synset_id][3]
+                            'words': wordnet_data[child_synset_id][3], 'pointers_gathered': False,
                         }
                         next_correct_out_pointers_missing_in_tree.add(child_synset_id)
             # todo can do above and below at once. combine both lists into dicts. iter through ['correct', 'decoy']
@@ -348,7 +358,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                         tree[child_synset_id] = {
                             'depth': child_depth, 'in': {parent_synset_id, }, 'correct': {}, 'decoy': {},
                             'pos': wordnet_data[child_synset_id][1], 'gloss': wordnet_data[child_synset_id][2],
-                            'words': wordnet_data[child_synset_id][3]
+                            'words': wordnet_data[child_synset_id][3], 'pointers_gathered': False,
                         }
                         if current_hp > 1:
                             next_decoy_out_pointers_missing_in_tree.add(child_synset_id)
@@ -357,9 +367,9 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             # print(f'decoy pointers: {decoy_pointers}')
 
         if len(next_correct_out_pointers_missing_in_tree) > 0:
-            current_correct_out_pointers_missing_in_tree = next_correct_out_pointers_missing_in_tree
+            current_out_pointers_missing_in_tree = next_correct_out_pointers_missing_in_tree
         elif len(next_decoy_out_pointers_missing_in_tree) > 0:
-            current_correct_out_pointers_missing_in_tree = next_decoy_out_pointers_missing_in_tree
+            current_out_pointers_missing_in_tree = next_decoy_out_pointers_missing_in_tree
             next_decoy_out_pointers_missing_in_tree = set()
             current_hp -= 1
         else:
@@ -378,7 +388,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             new_id = new_index_by_wordnet_index[wn_synset_id]
             symbol = old_correct[wn_synset_id]
             new_correct[new_id] = symbol
-
+        # todo combine above and below.
         old_decoy = tree[wordnet_synset_id]['decoy']
         new_decoy = {}
         for wn_synset_id in old_decoy:
@@ -399,16 +409,15 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
         if item is None:
             'None in condensed tree'
             exit()
-    print(f'{len(condensed_tree)} - {len(tree)}')
+    # print(f'condensed tree length vs og tree length: {len(condensed_tree)} - {len(tree)}')
     synsets_by_depth_total_length = 0
     for depth in synsets_by_depth:
         print(f'synsets at depth: {len(depth)}')
         synsets_by_depth_total_length += len(depth)
-    print(f'total synsets_by_depth items: {synsets_by_depth_total_length}')
+    print(f'total synsets_by_depth items: {synsets_by_depth_total_length}\n')
 
     new_synsets_by_depth = []
-    print(synsets_by_depth)
-    print(new_index_by_wordnet_index)
+    print(f'new_index_by_wordnet_index: {new_index_by_wordnet_index}')
     depth = -1  # todo debug only
     for old_depth_layer in synsets_by_depth:
         depth += 1
@@ -428,7 +437,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
 
     new_start_synset_id = new_index_by_wordnet_index[start_synset_id]
 
-    return condensed_tree, new_synsets_by_depth, new_start_synset_id
+    return condensed_tree, new_synsets_by_depth, new_start_synset_id, new_index_by_wordnet_index
 
 
 def random_main_group_synset(wordnet_data):
@@ -452,7 +461,7 @@ def rand_synset_max_connections(wordnet_data, samples=10):
             best_synset_id = rand_synset_id
             best_synset_connection_count = connections
 
-    print(f'Target Connections: {best_synset_connection_count}')
+    print(f'Target Connections: {best_synset_connection_count}\n')
 
     return best_synset_id
 
