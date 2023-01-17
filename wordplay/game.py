@@ -177,6 +177,8 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
     best_start_synset_connection_count = -1
     for _ in range(10):  # Finds best lateral connections at greatest depth/distance from target out of 10 random ones.
 
+        # print(synsets_by_depth)
+        # print(start_depth)
         rand_start_synset = random.choice(list(synsets_by_depth[start_depth]))
 
         connection_count = len(wordnet_data[rand_start_synset][4])
@@ -242,19 +244,21 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
         start_synset_id: {
             'depth': dist_from_target, 'in': set(), 'correct': {}, 'decoy': {},
             'words': wordnet_data[start_synset_id][3], 'pos': wordnet_data[start_synset_id][1],
-            'gloss': wordnet_data[start_synset_id][2], 'hp': hp, 'pointers_gathered': False,
+            'gloss': wordnet_data[start_synset_id][2], 'pointers_gathered': False,
         },
         target_synset_id: {
             'depth': 0, 'in': set(), 'correct': {}, 'decoy': {},
             'words': wordnet_data[target_synset_id][3], 'pos': wordnet_data[target_synset_id][1],
             'gloss': wordnet_data[target_synset_id][2], 'pointers_gathered': True,
-            # Correct, decoy, and hp will not be used at target, and pointers will not be gathered.
+            # Correct and decoy will not be used at target, and pointers will not be gathered.
+            # todo error thrown if keys arent in target key???
         },
     }
 
     current_out_pointers_missing_in_tree = {start_synset_id, }
     next_decoy_out_pointers_missing_in_tree = set()
     current_hp = hp
+    dead_ends = set()
 
     new_index_by_wordnet_index = {start_synset_id: 0, target_synset_id: 1}
 
@@ -328,6 +332,14 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                         del pointer_group[2]
                         break
 
+            if parent_depth == 1:
+                # Only need 1 correct pointer to target. Don't need decoys.
+                pointer = correct_pointers[0]
+                child_synset_id = pointer['id']
+                tree[parent_synset_id]['correct'][child_synset_id] = pointer['symbol']
+                tree[child_synset_id]['in'].add(parent_synset_id)  # todo 'in' key used????
+                continue  # Do not gather more pointers.
+
             for pointer in correct_pointers:
                 if pointer['sort_value'] is not None:
                     child_synset_id = pointer['id']
@@ -362,7 +374,10 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                         }
                         if current_hp > 1:
                             next_decoy_out_pointers_missing_in_tree.add(child_synset_id)
-                        # Else, hp after this set of decoys will be 0, and no more pointers are required.
+                        else:
+                            # Else, hp after this set of decoys will be 0, and no more pointers are required.
+                            # Reaching this synset means game over.
+                            dead_ends.add(child_synset_id)
 
             # print(f'decoy pointers: {decoy_pointers}')
 
@@ -374,6 +389,12 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             current_hp -= 1
         else:
             break  # No more synsets are added to next_decoy_out_pointers_missing_in_tree when current_hp <= 1.
+
+    dead_ends_new_index = set()
+    for wn_syn_id in dead_ends:
+        new_ndex = new_index_by_wordnet_index[wn_syn_id]
+        dead_ends_new_index.add(new_ndex)
+
 
     # condensed_tree = []
     condensed_tree = [None for _ in range(len(tree))]
@@ -437,7 +458,7 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
 
     new_start_synset_id = new_index_by_wordnet_index[start_synset_id]
 
-    return condensed_tree, new_synsets_by_depth, new_start_synset_id, new_index_by_wordnet_index
+    return condensed_tree, new_synsets_by_depth, new_start_synset_id, new_index_by_wordnet_index, dead_ends_new_index
 
 
 def random_main_group_synset(wordnet_data):
