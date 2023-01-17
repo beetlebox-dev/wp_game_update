@@ -433,12 +433,12 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
     # print(f'condensed tree length vs og tree length: {len(condensed_tree)} - {len(tree)}')
     synsets_by_depth_total_length = 0
     for depth in synsets_by_depth:
-        print(f'synsets at depth: {len(depth)}')
+        # print(f'synsets at depth: {len(depth)}')
         synsets_by_depth_total_length += len(depth)
-    print(f'total synsets_by_depth items: {synsets_by_depth_total_length}\n')
+    # print(f'total synsets_by_depth items: {synsets_by_depth_total_length}\n')
 
     new_synsets_by_depth = []
-    print(f'new_index_by_wordnet_index: {new_index_by_wordnet_index}')
+    # print(f'new_index_by_wordnet_index: {new_index_by_wordnet_index}')
     depth = -1  # todo debug only
     for old_depth_layer in synsets_by_depth:
         depth += 1
@@ -453,8 +453,8 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
             # Else, ok because most synsets in full depth search are not in tree.
         new_synsets_by_depth.append(new_depth_layer)
 
-    print(f'synsets_by_depth: {synsets_by_depth}')
-    print(f'new_synsets_by_depth: {new_synsets_by_depth}')
+    # print(f'synsets_by_depth: {synsets_by_depth}')
+    # print(f'new_synsets_by_depth: {new_synsets_by_depth}')
 
     new_start_synset_id = new_index_by_wordnet_index[start_synset_id]
 
@@ -482,7 +482,7 @@ def rand_synset_max_connections(wordnet_data, samples=10):
             best_synset_id = rand_synset_id
             best_synset_connection_count = connections
 
-    print(f'Target Connections: {best_synset_connection_count}\n')
+    # print(f'Target Connections: {best_synset_connection_count}\n')
 
     return best_synset_id
 
