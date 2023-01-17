@@ -1,5 +1,7 @@
 import pickle
 import random
+import statistics
+
 from wordplay.manage_database import POINTER_SYMBOL_KEY
 from wordplay.game import POINTER_TYPES_TO_IGNORE
 from game import game, get_game_tree
@@ -56,6 +58,7 @@ def get_depth(current_synset_num, synsets_by_depth, deepest_depth):
 
 
 lowest_index = 9999
+best_sdev_mu = 9999
 for _ in range(10):
 
     this_game_data = game(wordnet_data, analysis_depth, start_depth)
@@ -115,14 +118,32 @@ for _ in range(10):
 
     decoy_index /= len(i_game_tree)  # todo divide index by number of synsets in tree.
 
-    ratio = round(one_decoys / len(i_game_tree), 2)
+    # ratio = round(one_decoys / len(i_game_tree), 2)
+
     # print(f'\none_decoys: {one_decoys}')
     # print(f'one_decoys ratio: {ratio}')
     # print(f'one_decoy_depths: {one_decoy_depths}')
     # print(f'zero_decoy_depths: {zero_decoy_depths}')
     print(f'decoy_index: {decoy_index}')
 
-    if decoy_index < lowest_index:
+    if decoy_index > lowest_index:
+        continue
+
+    # Break ties of equal decoy index.
+    # todo don't need this if decoy_index > lowest_index.
+    num_synsets_all_depths = 0
+    num_nodes_each_depth = []
+    for synsets_at_depth in i_synsets_by_depth[1:]:  # Ignore target depth with always one synset.
+        num_synsets_this_depth = len(synsets_at_depth)
+        num_synsets_all_depths += num_synsets_this_depth
+        num_nodes_each_depth.append(num_synsets_this_depth)
+    mean_synsets_per_depth = num_synsets_all_depths / len(i_synsets_by_depth[1:])
+    sdev_depth = statistics.pstdev(num_nodes_each_depth, mean_synsets_per_depth)
+    sdev_depth_in_mean_units = sdev_depth / mean_synsets_per_depth
+    print(f'    {sdev_depth_in_mean_units}')
+
+    # decoy_index <= lowest_index
+    if decoy_index < lowest_index or sdev_depth_in_mean_units < best_sdev_mu:
         lateral_connections = i_lateral_connections
         non_lateral_connections = i_non_lateral_connections
         game_tree = i_game_tree
@@ -132,6 +153,7 @@ for _ in range(10):
         dead_ends = i_dead_ends
         deepest_depth = i_deepest_depth
         lowest_index = decoy_index
+        best_sdev_mu = sdev_depth_in_mean_units
 
 
 
@@ -140,6 +162,7 @@ print(f'game_tree = {game_tree}')
 print(f'size of tree: {len(game_tree)}')
 print(f'deepest_depth: {deepest_depth}')
 print(f'lowest_index: {lowest_index}')
+print(f'best_sdev_mu: {best_sdev_mu}')
 print(f'synsets_by_depth: {synsets_by_depth}')
 print(f'start_synset_num: {start_synset_num}')
 print(f'new_index_by_wordnet_index: {new_index_by_wordnet_index}')
