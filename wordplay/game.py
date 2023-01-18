@@ -291,9 +291,14 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
 
             correct_pointers = [{'id': None, 'sort_value': None}, {'id': None, 'sort_value': None}]
             decoy_pointers = [{'id': None, 'sort_value': None}, {'id': None, 'sort_value': None}]
+
+            # OLD
             # Sort by distance from target (prioritize closer), then by in_tree, then by connection_count.
             # sort_value = depth_change * 2000 + in_tree * 1000 + connections
             # Assumes: max number of connections possible < 1000. In_tree is either 1 (true) or 0 (false).
+
+            # NEW
+            # sort_value(0-11999) = one_way(0-1) * 6000 + in_tree(0-1) * 3000 + depth_change(0-2) * 1000 + connections(0-999)
 
             parent_depth = get_depth(parent_synset_id)
 
@@ -311,10 +316,17 @@ TREE DATA STRUCTURE: tree[direction][generation][sibling_group_index][sibling_in
                 depth_change = parent_depth - child_depth  # depth_change=1 means getting 1 degree CLOSER to target.
                 # Or a distance DECREASE of 1.
 
-                sort_value = depth_change * 2000
+                sort_value = (depth_change + 1) * 1000
 
                 if child_pointer_id in tree:
-                    sort_value += 1000
+                    sort_value += 3000  # In-tree.
+                    if parent_synset_id not in tree[child_pointer_id]['correct'] and parent_synset_id not in tree[child_pointer_id]['decoy']:
+                        # One-way.
+                        sort_value += 6000
+                    # Else not one-way.
+                else:
+                    # Not in-tree, and also therefore one-way.
+                    sort_value += 6000
 
                 num_connections = len(wordnet_data[child_pointer_id][4])
                 sort_value += num_connections
