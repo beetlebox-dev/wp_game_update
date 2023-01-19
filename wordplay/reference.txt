@@ -12,8 +12,8 @@ wordnet_index = {
 
 
 game_data[synset_index][x]
-x = 0 = correct_connections (dictionary) - Each key is a synset_index, and each value is a symbol representing the pointer type.
-x = 1 = decoy_connections (dictionary) - Each key is a synset_index, and each value is a symbol representing the pointer type.
+x = 0 = correct_pointers (dictionary) - Each key is a synset_index, and each value is a symbol representing the pointer type.
+x = 1 = decoy_pointers (dictionary) - Each key is a synset_index, and each value is a symbol representing the pointer type.
 x = 2 = words (list)
 x = 3 = pos (string)
 x = 4 = gloss (string)

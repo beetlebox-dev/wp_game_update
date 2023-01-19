@@ -1,16 +1,15 @@
 import random
+import statistics
 
 
 POINTER_TYPES_TO_IGNORE = {';u', '-u', '<', '<x', '!', '?p'}
 # usage domains/members, adjective/verb derivations, antonyms, word pivots
 
 
-# todo: Use get_depth_by_synset() ?
 # todo: Can add words/pos/gloss at prune phase and discard all previous instances in game_graph.
 
 
 def get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth):
-
     visited_synsets = {target_synset_id}
     synsets_by_depth = [{target_synset_id}]
     current_generation = [('__start', target_synset_id, 0, 0)]
@@ -48,16 +47,6 @@ def get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth):
     return synsets_by_depth
 
 
-# def get_depth_by_synset(synsets_by_depth):
-#     depth_by_synset = {}
-#     depth_layer_num = 0
-#     for depth_layer in synsets_by_depth:
-#         for synset_id in depth_layer:
-#             depth_by_synset[synset_id] = depth_layer_num
-#         depth_layer_num += 1
-#     return depth_by_synset
-
-
 def get_synset_with_most_pointers(wordnet_data, synset_set, samples=10):
     """Samples is the number of random synsets from synset_set to check before returning the best found."""
     best_synset_id = None
@@ -77,15 +66,16 @@ def get_synset_with_most_pointers(wordnet_data, synset_set, samples=10):
     return best_synset_id
 
 
-def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
+def get_depth(synset_id, synsets_by_depth):
+    synset_depth = 9999  # If depth not found, return 9999, which indicates the depth is beyond synsets_by_depth.
+    for search_depth in range(len(synsets_by_depth)):
+        if synset_id in synsets_by_depth[search_depth]:
+            synset_depth = search_depth
+            break
+    return synset_depth
 
-    def get_depth(synset_id):
-        synset_depth = 9999  # If depth not found, return 9999, which indicates the depth is beyond synsets_by_depth.
-        for search_depth in range(len(synsets_by_depth)):
-            if synset_id in synsets_by_depth[search_depth]:
-                synset_depth = search_depth
-                break
-        return synset_depth
+
+def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
 
     target_synset_id = list(synsets_by_depth[0])[0]
     # The only synset contained at depth 0 in synsets_by_depth.
@@ -131,14 +121,11 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
             # Pointer_count is the number of total WordNet pointers.
             # Parentheses contain possible variable ranges (inclusive).
 
-            parent_depth = get_depth(parent_synset_id)
+            parent_depth = get_depth(parent_synset_id, synsets_by_depth)
             best_pointers = {
                 'correct': [{'rank_value': None}, {'rank_value': None}],
                 'decoy': [{'rank_value': None}, {'rank_value': None}],
-            }
-            # best_correct_pointers = [{'rank_value': None}, {'rank_value': None}]
-            # best_decoy_pointers = [{'rank_value': None}, {'rank_value': None}]
-            # When actual pointers are added, other keys besides 'rank_value' are 'id' and 'symbol'.
+            }  # When actual pointers are added, other keys besides 'rank_value' are 'id' and 'symbol'.
 
             # Loop through all WordNet pointers, storing only the two with the highest rank_value.
             for child_pointer in wordnet_data[parent_synset_id][4]:  # "Out" pointers FROM parent_synset_id.
@@ -149,7 +136,7 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
                     continue  # Ignore specified pointers and word pivots.
 
                 child_pointer_id = child_pointer[1]
-                child_depth = get_depth(child_pointer_id)
+                child_depth = get_depth(child_pointer_id, synsets_by_depth)
                 depth_change = parent_depth - child_depth
                 #    A depth change of +1 means getting 1-degree CLOSER to the target, or a distance DECREASE of 1.
 
@@ -222,7 +209,7 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
     return game_graph, dead_ends
 
 
-def prune_game_data(game_graph, synsets_by_depth, dead_ends, start_synset_id):
+def prune_and_reindex_game_data(game_graph, synsets_by_depth, dead_ends, start_synset_id):
 
     # Assign new indices for game_graph synsets.
     new_index_by_wordnet_index = {}
@@ -266,12 +253,7 @@ def prune_game_data(game_graph, synsets_by_depth, dead_ends, start_synset_id):
 
     start_synset_id_reindexed = new_index_by_wordnet_index[start_synset_id]
 
-    return game_graph_reindexed, synsets_by_depth_pruned_and_reindexed, start_synset_id_reindexed, \
-           dead_ends_reindexed, new_index_by_wordnet_index
-
-
-
-
+    return game_graph_reindexed, synsets_by_depth_pruned_and_reindexed, start_synset_id_reindexed, dead_ends_reindexed
 
 
 def random_main_group_synset(wordnet_data):
@@ -279,55 +261,92 @@ def random_main_group_synset(wordnet_data):
         rand_synset_id = random.randint(0, len(wordnet_data))
         if wordnet_data[rand_synset_id][0] == -1:
             return rand_synset_id
-            # word = random.choice(wordnet_data[rand_synset_id][3])
-            # formatted_word = word.replace('_', ' ').split('(')[0]
-            # return formatted_word, rand_synset_id
 
 
-def rand_synset_max_connections(wordnet_data, samples=10):
+def rand_synset_max_in_pointers(wordnet_data, samples=10):
     best_synset_id = None
-    best_synset_connection_count = -1
-
+    best_pointer_count = -1
     for _ in range(samples):
         rand_synset_id = random_main_group_synset(wordnet_data)
-        connections = len(wordnet_data[rand_synset_id][5])  # Number of IN-pointers.
-        if connections > best_synset_connection_count:
+        pointer_count = len(wordnet_data[rand_synset_id][5])  # Number of IN-pointers.
+        if pointer_count > best_pointer_count:
             best_synset_id = rand_synset_id
-            best_synset_connection_count = connections
-
-    # print(f'Target Connections: {best_synset_connection_count}\n')
-
+            best_pointer_count = pointer_count
     return best_synset_id
 
 
-def game(wordnet_data, analysis_depth, start_depth, target=None):
-    if target is None:
-        rand_synset_id = rand_synset_max_connections(wordnet_data)
-    else:
-        rand_synset_id = target
-    # rand_synset_id = random_main_group_synset(wordnet_data)
-    synsets_by_depth = get_synsets_by_depth(wordnet_data, rand_synset_id, analysis_depth)
-    start_synset_id = get_synset_with_most_pointers(wordnet_data, synsets_by_depth[start_depth])
-    return synsets_by_depth, start_synset_id
+def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
 
-# # todo delete when incorporating into app.
-# import pickle
-#
-# with open('wordnet-data-0.pkl', 'rb') as file:
-#     loaded_wordnet_data = pickle.load(file)
-#
-# this_game_data = game(loaded_wordnet_data)
+    analysis_depth = start_depth + start_hp - 1
+    curated_game_graph = None
+    curated_start_synset_id = None
 
-# current_synset = None
-# for synset in treegame[0]:
-#     current_synset = synset
-#     break
-#
-# for child_pointer in wordnet_data[current_synset][4]:
-#     pointer_synset = child_pointer[1]
-#     target_word_index = child_pointer[3]
-#     if target_word_index != -1:
-#         key_words.append(target_word)
+    lowest_nodes_decoy_count_index = 9999  # Primary factor in choosing game_graph.
+    lowest_depth_node_counts_sdev = 9999  # Breaks ties of lowest_non_double_decoy_nodes_index.
 
+    for _ in range(samples):
 
-# todo don't use word-dependent pointers??????
+        # Generate random game_graph.
+        target_synset_id = rand_synset_max_in_pointers(wordnet_data)
+        synsets_by_depth_wn_index = get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth)
+        start_synset_id = get_synset_with_most_pointers(wordnet_data, synsets_by_depth_wn_index[start_depth])
+        get_game_graph_result = get_game_graph(wordnet_data, synsets_by_depth_wn_index, start_synset_id, start_hp)
+        game_graph = get_game_graph_result[0]
+        dead_ends_wn_indices = get_game_graph_result[1]
+        prune_and_reindex_game_data_result = \
+            prune_and_reindex_game_data(game_graph, synsets_by_depth_wn_index, dead_ends_wn_indices, start_synset_id)
+        this_game_graph = prune_and_reindex_game_data_result[0]
+        synsets_by_depth = prune_and_reindex_game_data_result[1]
+        this_start_synset_id = prune_and_reindex_game_data_result[2]
+        dead_ends = prune_and_reindex_game_data_result[3]
+
+        # Analyze random game graph.
+
+        nodes_decoy_count_index = 0
+        #    A value representing how often there aren't two decoy pointers in this_game_graph.
+        graph_node_index = -1
+        for synset_data in this_game_graph:
+            graph_node_index += 1
+
+            if graph_node_index in dead_ends:
+                continue  # Dead end nodes intentionally have no pointers.
+            depth = get_depth(graph_node_index, synsets_by_depth)
+            if depth < 2:
+                continue  # Nodes at depths 0 and 1 intentionally have no pointers.
+
+            decoy_pointer_count = len(synset_data[1])
+            if decoy_pointer_count == 1:
+                nodes_decoy_count_index += 1 / max(depth, 1)
+            elif decoy_pointer_count < 1:
+                nodes_decoy_count_index += 3
+                # 1 node with no decoy pointers is equivalent to having 3 nodes at depth 1 with only one decoy pointer.
+            # Else, decoy_pointer_count > 1. This is desirable, so nothing is added to non_double_pointers_index.
+
+        # Dividing non_double_decoy_nodes_index by the number of nodes in this_game_graph
+        # for apples-to-apples comparisons with other game_graphs.
+        nodes_decoy_count_index /= len(this_game_graph)
+
+        if nodes_decoy_count_index > lowest_nodes_decoy_count_index:
+            continue
+
+        # For breaking ties of equal lowest_non_double_decoy_nodes_index.
+        node_count_all_depths = 0
+        node_counts_each_depth = []
+        for nodes_at_this_depth in synsets_by_depth[1:]:  # Ignoring target depth with always one node.
+            num_nodes_this_depth = len(nodes_at_this_depth)
+            node_count_all_depths += num_nodes_this_depth
+            node_counts_each_depth.append(num_nodes_this_depth)
+        mean_nodes_per_depth = node_count_all_depths / len(synsets_by_depth[1:])
+        #    Ignoring target depth with always one node.
+        depth_node_counts_sdev = statistics.pstdev(node_counts_each_depth, mean_nodes_per_depth)
+        depth_node_counts_sdev_in_mean_units = depth_node_counts_sdev / mean_nodes_per_depth
+
+        # True (after continue above): non_double_pointers_index <= lowest_non_double_decoy_nodes_index
+        if nodes_decoy_count_index < lowest_nodes_decoy_count_index \
+                or depth_node_counts_sdev_in_mean_units < lowest_depth_node_counts_sdev:
+            curated_game_graph = this_game_graph
+            curated_start_synset_id = this_start_synset_id
+            lowest_nodes_decoy_count_index = nodes_decoy_count_index
+            lowest_depth_node_counts_sdev = depth_node_counts_sdev_in_mean_units
+
+    return curated_game_graph, curated_start_synset_id
