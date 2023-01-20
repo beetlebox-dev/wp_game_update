@@ -230,30 +230,31 @@ def prune_and_reindex_game_data(game_graph, synsets_by_depth, dead_ends, start_s
         revised_node = [
             pointers_reindexed['correct'],
             pointers_reindexed['decoy'],
+            # todo: Don't need to store words/pos/gloss in game_graph before now.
             list(game_graph[wordnet_index]['words']),
             game_graph[wordnet_index]['pos'],
             game_graph[wordnet_index]['gloss'],
         ]
         game_graph_reindexed[new_index] = revised_node
 
-    synsets_by_depth_pruned_and_reindexed = []
+    nodes_by_depth_pruned_and_reindexed = []
     for synsets_this_depth in synsets_by_depth:
-        synsets_this_depth_reindexed = set()
+        nodes_this_depth_reindexed = set()
         for wordnet_index in synsets_this_depth:
             if wordnet_index in game_graph:
                 new_index = new_index_by_wordnet_index[wordnet_index]
-                synsets_this_depth_reindexed.add(new_index)
+                nodes_this_depth_reindexed.add(new_index)
             # Else continue. Ok, because most synsets in original synsets_by_depth do not become part of game_graph.
-        synsets_by_depth_pruned_and_reindexed.append(synsets_this_depth_reindexed)
+        nodes_by_depth_pruned_and_reindexed.append(nodes_this_depth_reindexed)
 
     dead_ends_reindexed = set()
     for wn_syn_id in dead_ends:
-        new_ndex = new_index_by_wordnet_index[wn_syn_id]
-        dead_ends_reindexed.add(new_ndex)
+        new_dead_end_index = new_index_by_wordnet_index[wn_syn_id]
+        dead_ends_reindexed.add(new_dead_end_index)
 
-    start_synset_id_reindexed = new_index_by_wordnet_index[start_synset_id]
+    start_node_reindexed = new_index_by_wordnet_index[start_synset_id]
 
-    return game_graph_reindexed, synsets_by_depth_pruned_and_reindexed, start_synset_id_reindexed, dead_ends_reindexed
+    return game_graph_reindexed, nodes_by_depth_pruned_and_reindexed, start_node_reindexed, dead_ends_reindexed
 
 
 def random_main_group_synset(wordnet_data):
@@ -279,7 +280,8 @@ def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
 
     analysis_depth = start_depth + start_hp - 1
     curated_game_graph = None
-    curated_start_synset_id = None
+    curated_start_node_index = None
+    curated_target_node_index = None
 
     lowest_nodes_decoy_count_index = 9999  # Primary factor in choosing game_graph.
     lowest_depth_node_counts_sdev = 9999  # Breaks ties of lowest_non_double_decoy_nodes_index.
@@ -296,8 +298,8 @@ def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
         prune_and_reindex_game_data_result = \
             prune_and_reindex_game_data(game_graph, synsets_by_depth_wn_index, dead_ends_wn_indices, start_synset_id)
         this_game_graph = prune_and_reindex_game_data_result[0]
-        synsets_by_depth = prune_and_reindex_game_data_result[1]
-        this_start_synset_id = prune_and_reindex_game_data_result[2]
+        nodes_by_depth = prune_and_reindex_game_data_result[1]
+        this_start_node_index = prune_and_reindex_game_data_result[2]
         dead_ends = prune_and_reindex_game_data_result[3]
 
         # Analyze random game graph.
@@ -305,16 +307,16 @@ def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
         nodes_decoy_count_index = 0
         #    A value representing how often there aren't two decoy pointers in this_game_graph.
         graph_node_index = -1
-        for synset_data in this_game_graph:
+        for node_data in this_game_graph:
             graph_node_index += 1
 
             if graph_node_index in dead_ends:
                 continue  # Dead end nodes intentionally have no pointers.
-            depth = get_depth(graph_node_index, synsets_by_depth)
+            depth = get_depth(graph_node_index, nodes_by_depth)
             if depth < 2:
                 continue  # Nodes at depths 0 and 1 intentionally have no pointers.
 
-            decoy_pointer_count = len(synset_data[1])
+            decoy_pointer_count = len(node_data[1])
             if decoy_pointer_count == 1:
                 nodes_decoy_count_index += 1 / max(depth, 1)
             elif decoy_pointer_count < 1:
@@ -332,11 +334,11 @@ def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
         # For breaking ties of equal lowest_non_double_decoy_nodes_index.
         node_count_all_depths = 0
         node_counts_each_depth = []
-        for nodes_at_this_depth in synsets_by_depth[1:]:  # Ignoring target depth with always one node.
+        for nodes_at_this_depth in nodes_by_depth[1:]:  # Ignoring target depth with always one node.
             num_nodes_this_depth = len(nodes_at_this_depth)
             node_count_all_depths += num_nodes_this_depth
             node_counts_each_depth.append(num_nodes_this_depth)
-        mean_nodes_per_depth = node_count_all_depths / len(synsets_by_depth[1:])
+        mean_nodes_per_depth = node_count_all_depths / len(nodes_by_depth[1:])
         #    Ignoring target depth with always one node.
         depth_node_counts_sdev = statistics.pstdev(node_counts_each_depth, mean_nodes_per_depth)
         depth_node_counts_sdev_in_mean_units = depth_node_counts_sdev / mean_nodes_per_depth
@@ -345,8 +347,9 @@ def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
         if nodes_decoy_count_index < lowest_nodes_decoy_count_index \
                 or depth_node_counts_sdev_in_mean_units < lowest_depth_node_counts_sdev:
             curated_game_graph = this_game_graph
-            curated_start_synset_id = this_start_synset_id
+            curated_start_node_index = this_start_node_index
+            curated_target_node_index = list(nodes_by_depth[0])[0]  # Only node at depth 0.
             lowest_nodes_decoy_count_index = nodes_decoy_count_index
             lowest_depth_node_counts_sdev = depth_node_counts_sdev_in_mean_units
 
-    return curated_game_graph, curated_start_synset_id
+    return curated_game_graph, curated_start_node_index, curated_target_node_index

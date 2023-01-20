@@ -1,7 +1,7 @@
 import pickle
 from wordplay.manage_database import POINTER_SYMBOL_KEY
 from wordplay.game import POINTER_TYPES_TO_IGNORE
-from game import game, get_game_graph, prune_and_reindex_game_data, get_depth, curate_game_data
+from game import get_depth, curate_game_data
 
 
 with open('wordnet-data-0.pkl', 'rb') as file:
@@ -18,6 +18,7 @@ curated_game_data = curate_game_data(wordnet_data, start_depth, start_hp)
 
 game_tree = curated_game_data[0]
 start_synset_num = curated_game_data[1]
+target_synset_num = curated_game_data[2]
 
 
 print('')
@@ -28,33 +29,33 @@ print(f'start_synset_num: {start_synset_num}')
 
 
 
+#
+# wn_index_by_new_index = {}
+# for wn_index in new_index_by_wordnet_index:
+#     new_index = new_index_by_wordnet_index[wn_index]
+#     wn_index_by_new_index[new_index] = wn_index
 
-wn_index_by_new_index = {}
-for wn_index in new_index_by_wordnet_index:
-    new_index = new_index_by_wordnet_index[wn_index]
-    wn_index_by_new_index[new_index] = wn_index
-
-target_synset_num = list(synsets_by_depth[0])[0]  # The only synset contained within the first set in synsets_by_depth.
+# target_synset_num = list(synsets_by_depth[0])[0]  # The only synset contained within the first set in synsets_by_depth.
 
 
-def print_synset_info(synset_num, synsets_by_depth, deepest_depth, prefix=''):
+def print_synset_info(synset_num, prefix=''):
     # i.e. 2 | throw, chuck | To toss
 
     # wn_synset_num = new_index_by_wordnet_index[synset_num]
 
     # print(wordnet_data[synset_num])
 
-    # todo getting depth twice
-    current_synset_depth = get_depth(synset_num, synsets_by_depth)
-    # current_synset_depth = deepest_depth + 1
-    # for depth in range(deepest_depth + 1):
-    #     if synset_num in synsets_by_depth[depth]:
-    #         # print('found depth!')
-    #         current_synset_depth = depth
-    #         break
+    # # todo getting depth twice
+    # current_synset_depth = get_depth(synset_num, synsets_by_depth)
+    # # current_synset_depth = deepest_depth + 1
+    # # for depth in range(deepest_depth + 1):
+    # #     if synset_num in synsets_by_depth[depth]:
+    # #         # print('found depth!')
+    # #         current_synset_depth = depth
+    # #         break
 
     # Add depth.
-    print_string = f'{prefix}{synset_num} | dist-{current_synset_depth} '
+    print_string = f'{prefix}{synset_num} '
 
     # Add all words.
     # for word in wordnet_data[wn_synset_num][3]:
@@ -77,46 +78,45 @@ def print_synset_info(synset_num, synsets_by_depth, deepest_depth, prefix=''):
 
     print(print_string)
 
+#
+# def print_synset_info_wn(synset_num, synsets_by_depth, deepest_depth, prefix=''):
+#     # i.e. 2 | throw, chuck | To toss
+#
+#     # tree_synset_num = new_index_by_wordnet_index[synset_num]
+#
+#     # current_synset_depth = get_depth(tree_synset_num)
+#
+#
+#     # Add depth.
+#     print_string = f'{prefix}{synset_num} '
+#
+#     # Add all words.
+#     # for word in wordnet_data[wn_synset_num][3]:
+#     #     print_string += f'{word}, '
+#     try:
+#         for word in wordnet_data[synset_num][3]:
+#             print_string += f'{word}, '
+#     except:
+#         print('!!!!!!!@@@@@@@')
+#         print(game_tree)
+#         print(synset_num)
+#
+#     # Set words/gloss separator.
+#     print_string = print_string[:-2]  # Delete final ', '.
+#     # todo: Error if no words and length is 0???
+#     print_string += ' | '
+#
+#     # Add gloss.
+#     print_string += wordnet_data[synset_num][2]
+#
+#     print(print_string)
 
-def print_synset_info_wn(synset_num, synsets_by_depth, deepest_depth, prefix=''):
-    # i.e. 2 | throw, chuck | To toss
-
-    # tree_synset_num = new_index_by_wordnet_index[synset_num]
-
-    # current_synset_depth = get_depth(tree_synset_num)
-
-
-    # Add depth.
-    print_string = f'{prefix}{synset_num} '
-
-    # Add all words.
-    # for word in wordnet_data[wn_synset_num][3]:
-    #     print_string += f'{word}, '
-    try:
-        for word in wordnet_data[synset_num][3]:
-            print_string += f'{word}, '
-    except:
-        print('!!!!!!!@@@@@@@')
-        print(game_tree)
-        print(synset_num)
-
-    # Set words/gloss separator.
-    print_string = print_string[:-2]  # Delete final ', '.
-    # todo: Error if no words and length is 0???
-    print_string += ' | '
-
-    # Add gloss.
-    print_string += wordnet_data[synset_num][2]
-
-    print(print_string)
-
-
-print('')
-print_synset_info(target_synset_num, synsets_by_depth, deepest_depth, 'TARGET: | ')
-print('')
+#
+# print('')
+# print_synset_info(target_synset_num, synsets_by_depth, deepest_depth, 'TARGET: | ')
+# print('')
 
 current_synset_num = start_synset_num
-last_pointer_symbol = None
 
 visit_order = {}
 visit_number = 0
@@ -131,42 +131,14 @@ while True:
     # decoy_synsets = [[None, -1], [None, -1], [None, -1]]  # [lateral, ==1_away, >1_away]
     # toward_synset = [None, -1]
 
-    # todo getting depth twice
-    current_synset_depth = get_depth(current_synset_num, synsets_by_depth)
-    # print(f'current depth: {current_synset_depth}')
-    # current_synset_depth = deepest_depth + 1
-    # for depth in range(deepest_depth + 1):
-    #     if current_synset_num in synsets_by_depth[depth]:
-    #         # print('found depth!')
-    #         current_synset_depth = depth
-    #         break
+    # current_synset_depth = get_depth(current_synset_num, synsets_by_depth)
 
-    print_synset_info(current_synset_num, synsets_by_depth, deepest_depth, 'CURRENT: | ')
-    print('')
 
-    wn_current_synset_num = wn_index_by_new_index[current_synset_num]
-
-    pointer_num = 1
-    for pointer in wordnet_data[wn_current_synset_num][4]:
-        # todo: If not pointer ignore type/sequence:
-        # todo: Check pointer types.
-
-        pointer_prefix = '    '
-
-        pointer_synset_id = pointer[1]
-
-        # connections = len(wordnet_data[pointer_synset_id][4])  # Number of OUT-pointers.
-
-        child_pointer_symbol = pointer[0]
-        if child_pointer_symbol in POINTER_TYPES_TO_IGNORE:
-            pointer_prefix += 'IGNORED '
-        pointer_prefix += f'{pointer_num}) {POINTER_SYMBOL_KEY[child_pointer_symbol]["phrase"]} | '
-        print_synset_info_wn(pointer_synset_id, synsets_by_depth, deepest_depth, pointer_prefix)
-        pointer_num += 1
+    print_synset_info(current_synset_num, 'CURRENT: | ')
 
     print('')
-    print_synset_info(target_synset_num, synsets_by_depth, deepest_depth, 'TARGET: | ')
-    print_synset_info(current_synset_num, synsets_by_depth, deepest_depth, 'CURRENT: | ')
+    print_synset_info(target_synset_num, 'TARGET: | ')
+    print_synset_info(current_synset_num, 'CURRENT: | ')
     print('')
 
     # correct_pointers = game_tree[current_synset_num]['correct']
@@ -185,6 +157,7 @@ while True:
             else:
                 this_order = visit_order[pointer_id]
             if this_order < oldest_order:
+                # For ties, the first pointer listed wins, and is ordered to be favorable.
                 oldest_order = this_order
                 chosen_pointer_id = pointer_id
 
@@ -197,14 +170,14 @@ while True:
             # pointer = ptr_grp[chosen_pointer_id]
             # pointer_symbol = pointer['symbol']
             prefix = f'    {pointers_group}: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
-            print_synset_info(chosen_pointer_id, synsets_by_depth, deepest_depth, prefix)
+            print_synset_info(chosen_pointer_id, prefix)
 
         for option_pointer_id in ptr_grp:
             pointer_symbol = ptr_grp[option_pointer_id]
             # pointer = ptr_grp[option_pointer_id]
             # pointer_symbol = pointer['symbol']
             prefix = f'    {pointers_group}opt: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
-            print_synset_info(option_pointer_id, synsets_by_depth, deepest_depth, prefix)
+            print_synset_info(option_pointer_id, prefix)
 
     print('')
 

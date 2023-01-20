@@ -11,14 +11,13 @@ wordnet_index = {
 
 
 
-game_data[synset_index][x]
-x = 0 = correct_pointers (dictionary) - Each key is a synset_index, and each value is a symbol representing the pointer type.
-x = 1 = decoy_pointers (dictionary) - Each key is a synset_index, and each value is a symbol representing the pointer type.
+game_graph[node_index][x]
+x = 0 = correct_pointers (dictionary) - Each key is a node_index, and each value is a symbol representing the pointer type.
+x = 1 = decoy_pointers (dictionary) - Each key is a node_index, and each value is a symbol representing the pointer type.
 x = 2 = words (list)
 x = 3 = pos (string)
 x = 4 = gloss (string)
-*
-correct_or_decoy_connections
+
 
 synset = (group, pos, gloss, (word, word, ... ), (out_pointer, out_pointer, ... ), (in_pointer, in_pointer, ... ))
 pointer = (type, synset_index, source_word_index, target_word_index)
