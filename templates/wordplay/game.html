@@ -26,6 +26,16 @@
             font-size: 1.2em;
         }
 
+        #target, #option-a-text, #option-b-text {
+            padding: 3vw;
+            box-sizing: border-box;
+        }
+
+        .path-history-words {
+            padding: 0.5vw 3vw;
+        }
+
+
         #path-history {
             color: white;
         }
@@ -36,6 +46,33 @@
 
         #current-choices .words {
             font-weight: bold;
+        }
+
+        .opt-a-row-container, .opt-b-row-container, .flex {
+            display: flex;
+        }
+
+        .flex {
+            height: 10vw;
+        }
+
+        .opt-a-mid-space, .opt-b-mid-space {
+            flex: 1
+        }
+
+        .opt-a-mid-space, #option-a-text {
+            /* background-color: red; */
+            background-color: hsl(205, 100%, 50%);
+            text-align: right;
+        }
+        .opt-b-mid-space, #option-b-text {
+            /* background-color: red; */
+            background-color: hsl(195, 100%, 50%);
+            text-align: left;
+        }
+
+        #option-a-text, #option-b-text {
+            flex: 9;
         }
 
         .pointer {
@@ -60,29 +97,45 @@
 
     <div id="path-history">
 
-        <div style="background-color: hsl(150, 100%, 0%); color: hsl(80, 50%, 50%)"><span class="words">euphonium</span></div>
-        <div style="background-color: hsl(150, 100%, 0%); color: hsl(120, 50%, 50%)"><span class="words">huevos rancheros</span></div>
-        <div style="background-color: hsl(150, 100%, 0%); color: hsl(160, 50%, 50%)"><span class="words">defenestration, murder</span></div>
-        <div style="background-color: hsl(200, 100%, 10%); color: hsl(200, 100%, 50%)"><span class="words">shape, form</span></div>
+        <div class="path-history-words" style="background-color: hsl(150, 100%, 100%); color: hsl(0, 0%, 0%)"><span class="words">euphonium</span></div>
+        <div class="path-history-words" style="background-color: hsl(150, 100%, 100%); color: hsl(0, 0%, 0%)"><span class="words">huevos rancheros</span></div>
+        <div class="path-history-words" style="background-color: hsl(150, 100%, 100%); color: hsl(0, 0%, 0%)"><span class="words">defenestration, murder</span></div>
+        <div class="path-history-words" style="background-color: hsl(200, 100%, 100%); color: hsl(200, 100%, 40%)"><span class="words">shape, form</span></div>
 
     </div>
 
     <div id="current-choices">
 
-        <div id="option-a" style="background-color: hsl(205, 100%, 50%)">
-            <span class="pointer">a kind of which is</span>
-            <br>
-            <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>&nbsp;&nbsp;
-            <br>
-            <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
+        <div class="flex">
+            <div class="opt-b-mid-space"></div>
+            <div class="opt-a-mid-space"></div>
         </div>
 
-        <div id="option-b" style="background-color: hsl(195, 100%, 50%)">
-            <span class="pointer">which is caused by</span>
-            <br>
-            <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>&nbsp;&nbsp;
-            <br>
-            <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
+        <div class="opt-a-row-container">
+            <div class="opt-b-mid-space"></div>
+            <div id="option-a-text">
+                <span class="pointer">a kind of which is</span>
+                <br>
+                <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>&nbsp;&nbsp;
+                <br>
+                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
+            </div>
+        </div>
+
+        <div class="opt-b-row-container">
+            <div id="option-b-text">
+                <span class="pointer">which is caused by</span>
+                <br>
+                <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>&nbsp;&nbsp;
+                <br>
+                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
+            </div>
+            <div class="opt-a-mid-space"></div>
+        </div>
+
+        <div class="flex">
+            <div class="opt-b-mid-space"></div>
+            <div class="opt-a-mid-space"></div>
         </div>
 
     </div>
