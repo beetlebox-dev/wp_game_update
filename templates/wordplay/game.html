@@ -28,7 +28,7 @@
 
         #option-a-text {
             border-left: 5px solid black;
-            border-top: 5px solid black;
+            /* border-top: 5px solid black; */
             padding: 3vw 0 3vw 3vw;
         }
 
@@ -105,16 +105,16 @@
         }
 
         .last {
-            padding: 3vw;
+            padding: 2vw 0;
+            border: 5px solid white;
             flex: 18;
             color: hsl(313, 100%, 50%);
-            /* color: hsl(133, 100%, 50%); */
             background-color: black;
+            /* background-color: hsl(133, 100%, 10%); */
+            /* background-color: black; */
             /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), black, hsl(180, 100%, 50%)); */
             /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), black 20%, black 80%, hsl(180, 100%, 50%) 100%); */
-            background-image: linear-gradient(to right, hsl(86, 100%, 50%), hsl(133, 100%, 6%) 20%, hsl(133, 100%, 6%) 80%, hsl(180, 100%, 50%) 100%);
-            /* background-color: hsl(133, 100%, 100%); */
-            /* background-color: hsl(133, 100%, 6%); */
+            /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), hsl(133, 100%, 8%) 20%, hsl(133, 100%, 8%) 80%, hsl(180, 100%, 50%) 100%); */
         }
 
         .opt-a-mid-space, #option-a-text {
@@ -126,6 +126,11 @@
             /* background-color: red; */
             background-color: hsl(86, 100%, 50%);
             text-align: left;
+        }
+
+        .opts {
+            padding: 0 2vw;
+            background-color: black;
         }
 
         .opt-b-row-container .opt-a-mid-space, .target-container .opt-a-mid-space  {
@@ -167,20 +172,20 @@
             <div class="path-history-words"><span class="words">euphonium</span></div>
             <div class="path-history-words"><span class="words">huevos rancheros</span></div>
             <div class="path-history-words"><span class="words">defenestration, murder</span></div>
+            <div class="path-history-words last"><span class="words">shape, form</span></div>
+
         </div>
     </div>
 
-    <div class="flex">
+    <div class="flex opts">
 
         <div class="opt-b-mid-space"></div>
 
         <div id="current-choices">
 
-            <div class="last-row">
-                <!-- <div class="opt-b-mid-space"></div> -->
+            <!-- <div class="last-row">
                 <div class="path-history-words last"><span class="words">shape, form</span></div>
-                <!-- <div class="opt-a-mid-space"></div> -->
-            </div>
+            </div> -->
 
             <!-- <div class="last-row-margin">
                 <div class="black-space"></div>
