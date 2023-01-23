@@ -18,7 +18,7 @@
 
         #target {
             /* color: white; */
-            background-color: black;
+            /* background-color: black; */
         }
 
         .words {
@@ -26,22 +26,51 @@
             font-size: 1.2em;
         }
 
-        #target, #option-a-text, #option-b-text {
+        #option-a-text {
+            border-left: 5px solid black;
+            border-top: 5px solid black;
+            padding: 3vw 0 3vw 3vw;
+        }
+
+        #option-b-text {
+            border-top: 5px solid black;
+            border-right: 5px solid black;
+            /* border-bottom: 3px solid black; */
+            padding: 3vw 3vw 3vw 0;
+        }
+
+        #target {
             padding: 3vw;
+        }
+
+        #target, #option-a-text, #option-b-text {
+            /* padding: 3vw; */
             box-sizing: border-box;
         }
 
         .path-history-words {
+            /* text-align: left; */
             padding: 0.5vw 3vw;
+            color: hsl(133, 0%, 60%);
         }
 
+        .last-row {
+            display: flex;
+        }
 
-        #path-history {
-            color: white;
+        #path-history, #target {
+            background-color: black;
+            /* color: white; */
+            /* background-color: hsl(133, 100%, 5%); */
+            /* color: white; */
         }
 
         #target .words {
             color: white;
+        }
+
+        #current-choices {
+            flex: 18;
         }
 
         #current-choices .words {
@@ -53,31 +82,68 @@
         }
 
         .flex {
-            height: 10vw;
+            display: flex;
+            /* height: 10vw; */
         }
 
         .opt-a-mid-space, .opt-b-mid-space {
-            flex: 1
+            flex: 1;
+        }
+
+        .last-row-margin {
+            display: flex;
+            height: 2vw;
+        }
+
+        .black-space {
+            background-color: black;
+            flex: 18;
+        }
+
+        #target, #path-history {
+            flex: 18;
+        }
+
+        .last {
+            padding: 3vw;
+            flex: 18;
+            color: hsl(313, 100%, 50%);
+            /* color: hsl(133, 100%, 50%); */
+            background-color: black;
+            /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), black, hsl(180, 100%, 50%)); */
+            /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), black 20%, black 80%, hsl(180, 100%, 50%) 100%); */
+            background-image: linear-gradient(to right, hsl(86, 100%, 50%), hsl(133, 100%, 6%) 20%, hsl(133, 100%, 6%) 80%, hsl(180, 100%, 50%) 100%);
+            /* background-color: hsl(133, 100%, 100%); */
+            /* background-color: hsl(133, 100%, 6%); */
         }
 
         .opt-a-mid-space, #option-a-text {
             /* background-color: red; */
-            background-color: hsl(205, 100%, 50%);
+            background-color: hsl(180, 100%, 50%);
             text-align: right;
         }
         .opt-b-mid-space, #option-b-text {
             /* background-color: red; */
-            background-color: hsl(195, 100%, 50%);
+            background-color: hsl(86, 100%, 50%);
             text-align: left;
         }
 
+        .opt-b-row-container .opt-a-mid-space, .target-container .opt-a-mid-space  {
+            /* background-color: hsl(180, 100%, 25%); */
+            /* background-color: hsl(180, 100%, 70%);
+            background-color: hsl(86, 100%, 70%); */
+        }
+
         #option-a-text, #option-b-text {
-            flex: 9;
+            flex: 19;
         }
 
         .pointer {
-            color: white;
-            opacity: 70%;
+            color: hsl(313, 100%, 50%);
+            font-style: italic;
+
+            /* color: white; */
+            /* opacity: 70%; */
         }
 
         .gloss, .pos, .pointer {
@@ -95,6 +161,172 @@
 
 <body>
 
+
+    <div class="flex">
+        <div id="path-history">
+            <div class="path-history-words"><span class="words">euphonium</span></div>
+            <div class="path-history-words"><span class="words">huevos rancheros</span></div>
+            <div class="path-history-words"><span class="words">defenestration, murder</span></div>
+        </div>
+    </div>
+
+    <div class="flex">
+
+        <div class="opt-b-mid-space"></div>
+
+        <div id="current-choices">
+
+            <div class="last-row">
+                <!-- <div class="opt-b-mid-space"></div> -->
+                <div class="path-history-words last"><span class="words">shape, form</span></div>
+                <!-- <div class="opt-a-mid-space"></div> -->
+            </div>
+
+            <!-- <div class="last-row-margin">
+                <div class="black-space"></div>
+            </div> -->
+
+            <div class="opt-a-row-container">
+                <!-- <div class="opt-b-mid-space"></div> -->
+                <div id="option-a-text">
+                    <span class="pointer">a kind of which is</span>
+                    <br>
+                    <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                    <br>
+                    <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
+                </div>
+            </div>
+
+            <div class="opt-b-row-container">
+                <div id="option-b-text">
+                    <span class="pointer">which is caused by</span>
+                    <br>
+                    <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                    <br>
+                    <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
+                </div>
+                <!-- <div class="opt-a-mid-space"></div> -->
+            </div>
+
+        </div>
+
+        <div class="opt-a-mid-space"></div>
+
+    </div>
+
+    <div id="target" style="color: hsl(200, 0%, 80%)">
+        <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
+        <br>
+        <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
+    </div>
+
+
+<!-- 
+    <div class="flex">
+        <div id="path-history">
+            <div class="path-history-words"><span class="words">euphonium</span></div>
+            <div class="path-history-words"><span class="words">huevos rancheros</span></div>
+            <div class="path-history-words"><span class="words">defenestration, murder</span></div>
+            <div class="last-row">
+                <div class="opt-b-mid-space"></div>
+                <div class="path-history-words last"><span class="words">shape, form</span></div>
+                <div class="opt-a-mid-space"></div>
+            </div>
+            <div class="last-row-margin">
+                <div class="opt-b-mid-space"></div>
+                <div class="black-space"></div>
+                <div class="opt-a-mid-space"></div>
+            </div>
+            </div>
+    </div>
+
+    <div id="current-choices">
+
+        <div class="opt-a-row-container">
+            <div class="opt-b-mid-space"></div>
+            <div id="option-a-text">
+                <span class="pointer">a kind of which is</span>
+                <br>
+                <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                <br>
+                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
+            </div>
+        </div>
+
+        <div class="opt-b-row-container">
+            <div id="option-b-text">
+                <span class="pointer">which is caused by</span>
+                <br>
+                <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                <br>
+                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
+            </div>
+            <div class="opt-a-mid-space"></div>
+        </div>
+
+    </div>
+
+    <div id="target" style="color: hsl(200, 0%, 80%)">
+        <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
+        <br>
+        <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
+    </div> -->
+
+<!-- 
+    <div class="flex">
+        <div class="opt-b-mid-space"></div>
+        <div id="path-history">
+            <div class="path-history-words"><span class="words">euphonium</span></div>
+            <div class="path-history-words"><span class="words">huevos rancheros</span></div>
+            <div class="path-history-words"><span class="words">defenestration, murder</span></div>
+            <div class="path-history-words last"><span class="words">shape, form</span></div>
+        </div>
+        <div class="opt-a-mid-space"></div>
+    </div>
+
+    <div id="current-choices">
+
+        <div class="opt-a-row-container">
+            <div class="opt-b-mid-space"></div>
+            <div id="option-a-text">
+                <span class="pointer">a kind of which is</span>
+                <br>
+                <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                <br>
+                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
+            </div>
+        </div>
+
+        <div class="opt-b-row-container">
+            <div id="option-b-text">
+                <span class="pointer">which is caused by</span>
+                <br>
+                <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                <br>
+                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
+            </div>
+            <div class="opt-a-mid-space"></div>
+        </div>
+
+    </div>
+
+    <div id="target" style="color: hsl(200, 0%, 80%)">
+        <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
+        <br>
+        <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
+    </div> -->
+
+        <!-- <div class="flex target-container">
+        <div class="opt-b-mid-space"></div>
+        <div id="target" style="color: hsl(200, 0%, 80%)">
+            <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
+            <br>
+            <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
+        </div>
+        <div class="opt-a-mid-space"></div>
+    </div> -->
+
+<!-- 
     <div id="path-history">
 
         <div class="path-history-words" style="background-color: hsl(150, 100%, 100%); color: hsl(0, 0%, 0%)"><span class="words">euphonium</span></div>
@@ -144,59 +376,8 @@
         <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
         <br>
         <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
-    </div>
+    </div> -->
 
-    <!-- <table>
-
-        <colgroup>
-            <col span="1" style="width: 30%">
-            <col span="1" style="width: 70%">
-        </colgroup>
-
-        <tr><td class="top-header" colspan="2">
-            <h1><span>{{ source }} </span><img class="arrow-img" alt="" src="{{ url_for('static', filename='wordplay/arrow-down.png') }}"><span> {{ target }}</span></h1>
-            <h3 class="blend-color"><em>{{ info }}</em></h3>
-        </td></tr>
-
-        {% for path in paths %}
-
-        <tr class="path-heading"><td colspan="2">path through <span style="color: {{ paths[path][0]['color_a'] }}">{{ paths[path][(paths[path]|length / 2)|int]['key_words'][0] }}</span></td></tr>
-
-        {% for node in paths[path] %}
-
-        <tr style="background-color: {{ node['color_a'] }}">
-
-            <td class="key-words">{{ node['key_words'][0] }}</td>
-
-            {% if node['two_kw'] %}
-            <td rowspan="3" class="synset-info">
-            {% else %}
-            <td rowspan="1" class="synset-info">
-            {% endif %}
-                <p class="pos-words"><em style="color: {{ node['color_c'] }}">{{ node['pos'] }}</em> {{ node['other_words'] }}</p>
-                <p class="gloss">{{ node['gloss'] }}</p>
-            </td>
-
-        </tr>
-
-        {% if node['two_kw'] %}
-        <tr style="background-color: {{ node['color_a'] }}"><td class="arrows" style="color: {{ node['color_c'] }}"><img class="arrow-img" alt="" src="{{ url_for('static', filename='wordplay/arrow-down.png') }}"></td></tr>
-        <tr style="background-color: {{ node['color_a'] }}"><td class="key-words">{{ node['key_words'][1] }}</td></tr>
-        {% endif %}
-
-        {% if node['pointer_phrase'] != "(end marker)" %}
-        <tr style="background-color: {{ node['color_b'] }}">
-            <td class="arrows" style="color: {{ node['color_c'] }}"><img class="arrow-img" alt="" src="{{ url_for('static', filename='wordplay/arrow-down.png') }}"></td>
-            <td class="pos-words" style="color: {{ node['color_c'] }}"><em>{{ node['pointer_phrase'] }}</em></td>
-        </tr>
-        {% endif %}
-
-        {% endfor %}
-
-        {% endfor %}
-
-    </table> -->
-    
 </body>
 
 <script src="{{ url_for('static', filename='wordplay/menu.js') }}"></script>
