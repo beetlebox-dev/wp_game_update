@@ -12,6 +12,7 @@
     <style>
 
         body {
+            background-color: black;
             margin: 0;
             text-align: center;
         }
@@ -27,14 +28,14 @@
         }
 
         #option-a-text {
-            border-left: 5px solid black;
+            border-left: 5px solid white;
             /* border-top: 5px solid black; */
             padding: 3vw 0 3vw 3vw;
         }
 
         #option-b-text {
-            border-top: 5px solid black;
-            border-right: 5px solid black;
+            border-top: 5px solid white;
+            border-right: 5px solid white;
             /* border-bottom: 3px solid black; */
             padding: 3vw 3vw 3vw 0;
         }
@@ -65,7 +66,14 @@
             /* color: white; */
         }
 
+        #target {
+            color: white;
+            background-color: hsl(0, 0%, 10%);
+            margin: 0 2vw;
+        }
+
         #target .words {
+            /* color: white; */
             color: white;
         }
 
@@ -126,6 +134,10 @@
             /* background-color: red; */
             background-color: hsl(86, 100%, 50%);
             text-align: left;
+        }
+
+        .last {
+            margin: 0 2vw;
         }
 
         .opts {
@@ -219,7 +231,7 @@
 
     </div>
 
-    <div id="target" style="color: hsl(200, 0%, 80%)">
+    <div id="target">
         <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
         <br>
         <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
