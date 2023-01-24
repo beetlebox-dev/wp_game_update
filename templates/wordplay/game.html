@@ -98,6 +98,12 @@
             flex: 1;
         }
 
+        .target-margin {
+            height: 3vw;
+            border-top: 5px solid white;
+            border-bottom: 5px solid white;
+        }
+
         .last-row-margin {
             display: flex;
             height: 2vw;
@@ -117,7 +123,8 @@
             border: 5px solid white;
             flex: 18;
             color: hsl(313, 100%, 50%);
-            background-color: black;
+            /* background-color: black; */
+            background-color: hsl(0, 0%, 10%);
             /* background-color: hsl(133, 100%, 10%); */
             /* background-color: black; */
             /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), black, hsl(180, 100%, 50%)); */
@@ -172,12 +179,56 @@
             opacity: 60%;
         }
 
+        .x-area {
+            display: inline-block;
+            text-align: left;
+            /* flex-direction: row; */
+            /* box-sizing: border-box; */
+
+            height: 30px;
+            border: 1px solid white;  /* same as x-area img */
+        }
+        .stats-x-box {
+            display: inline-block;
+            /* text-align: left; */
+            width: 30px;
+            /*  match */
+            height: 30px;
+        }
+        .x-area img {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            border: 1px solid white;
+        }
+
+        .path-length {
+            color: white;
+        }
+
     </style>
     
 </head>
 
 <body>
 
+    <div class="stats">
+
+        <div class="x-area">
+            <div class="stats-x-box">
+                <img src="/static/red_x.png" alt="">
+            </div
+            ><div class="stats-x-box">
+                <img src="/static/red_x.png" alt="">
+            </div
+            ><div class="stats-x-box">
+                <img src="/static/red_x.png" alt="">
+            </div>
+        </div>
+
+        <span class="path-length">Path length: 1</span>
+
+    </div>
 
     <div class="flex">
         <div id="path-history">
@@ -230,6 +281,8 @@
         <div class="opt-a-mid-space"></div>
 
     </div>
+
+    <div class="target-margin"></div>
 
     <div id="target">
         <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
