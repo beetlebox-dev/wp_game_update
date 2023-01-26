@@ -13,8 +13,14 @@
 
         body {
             background-color: black;
+            font-family: Futura, "Century Gothic", sans-serif;
             margin: 0;
             text-align: center;
+            padding: 3vw;
+        }
+
+        #path-history {
+            margin: 3vw 0;
         }
 
         #target {
@@ -23,19 +29,19 @@
         }
 
         .words {
-            font-family: Futura, "Century Gothic", sans-serif;
+            /* font-family: Futura, "Century Gothic", sans-serif; */
             font-size: 1.2em;
         }
 
         #option-a-text {
-            border-left: 5px solid white;
+            border-left: 5px solid black;
             /* border-top: 5px solid black; */
             padding: 3vw 0 3vw 3vw;
         }
 
         #option-b-text {
-            border-top: 5px solid white;
-            border-right: 5px solid white;
+            border-top: 5px solid black;
+            border-right: 5px solid black;
             /* border-bottom: 3px solid black; */
             padding: 3vw 3vw 3vw 0;
         }
@@ -51,7 +57,7 @@
 
         .path-history-words {
             /* text-align: left; */
-            padding: 0.5vw 3vw;
+            /* padding: 0.5vw 3vw; */
             color: hsl(133, 0%, 60%);
         }
 
@@ -67,9 +73,9 @@
         }
 
         #target {
-            color: white;
+            color: hsl(0, 0%, 80%);
             background-color: hsl(0, 0%, 10%);
-            margin: 0 2vw;
+            /* margin: 0 2vw; */
         }
 
         #target .words {
@@ -144,11 +150,12 @@
         }
 
         .last {
-            margin: 0 2vw;
+            /* margin-top: 3vw; */
+            /* margin: 0 2vw; */
         }
 
         .opts {
-            padding: 0 2vw;
+            /* padding: 0 2vw; */
             background-color: black;
         }
 
@@ -179,9 +186,18 @@
             opacity: 60%;
         }
 
+        .stats {
+            /* margin-bottom: 3vw; */
+            display: flex;
+            height: 30px;  /* Same as text hp. */
+            justify-content: space-between;
+            /* align-items: center; */
+        }
+
         .x-area {
             display: inline-block;
             text-align: left;
+            box-sizing: border-box;
             /* flex-direction: row; */
             /* box-sizing: border-box; */
 
@@ -190,20 +206,39 @@
         }
         .stats-x-box {
             display: inline-block;
+            /* box-sizing: border-box; */
             /* text-align: left; */
-            width: 30px;
+            aspect-ratio: 1/1;
+            height: 100%;
+            /* width: 30px; */
             /*  match */
-            height: 30px;
+            /* height: 30px; */
         }
         .x-area img {
+            /* box-sizing: border-box;
+            width: 100%;
+            height: 100%; */
+            border: 1px solid white;
+        }
+        .area img {
             box-sizing: border-box;
             width: 100%;
             height: 100%;
-            border: 1px solid white;
+            /* border: 1px solid white; */
         }
+
+        .arrow-area .stats-x-box {
+            margin-left: 6px;
+        }
+
 
         .path-length {
             color: white;
+            font-size: 30px;
+        }
+
+        .target-span {
+            color: hsl(313, 100%, 50%);
         }
 
     </style>
@@ -214,7 +249,7 @@
 
     <div class="stats">
 
-        <div class="x-area">
+        <div class="x-area area">
             <div class="stats-x-box">
                 <img src="/static/red_x.png" alt="">
             </div
@@ -226,19 +261,28 @@
             </div>
         </div>
 
-        <span class="path-length">Path length: 1</span>
-
-    </div>
-
-    <div class="flex">
-        <div id="path-history">
-            <div class="path-history-words"><span class="words">euphonium</span></div>
-            <div class="path-history-words"><span class="words">huevos rancheros</span></div>
-            <div class="path-history-words"><span class="words">defenestration, murder</span></div>
-            <div class="path-history-words last"><span class="words">shape, form</span></div>
-
+        <div class="area arrow-area">
+            <div class="stats-x-box">
+                <img src="/static/arrow_outline.png" alt="">
+            </div
+            ><div class="stats-x-box">
+                <img src="/static/arrow_outline.png" alt="">
+            </div
+            ><div class="stats-x-box">
+                <img src="/static/arrow_outline.png" alt="">
+            </div>
         </div>
+
     </div>
+
+    <!-- <div class="flex"> -->
+    <div id="path-history">
+        <div class="path-history-words"><span class="words">euphonium</span></div>
+        <div class="path-history-words"><span class="words">huevos rancheros</span></div>
+        <div class="path-history-words"><span class="words">defenestration, murder</span></div>
+    </div>
+    <div class="path-history-words last"><span class="words">shape, form</span></div>
+    <!-- </div> -->
 
     <div class="flex opts">
 
@@ -259,7 +303,7 @@
                 <div id="option-a-text">
                     <span class="pointer">a kind of which is</span>
                     <br>
-                    <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                    <span class="words">condense, concentrate, contract&nbsp;&nbsp;</span><span class="pos">verb</span>
                     <br>
                     <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
                 </div>
@@ -269,7 +313,7 @@
                 <div id="option-b-text">
                     <span class="pointer">which is caused by</span>
                     <br>
-                    <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>
+                    <span class="words">change&nbsp;&nbsp;</span><span class="pos">verb</span>
                     <br>
                     <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
                 </div>
@@ -285,7 +329,9 @@
     <div class="target-margin"></div>
 
     <div id="target">
-        <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
+        <span class="target-span">TARGET: </span>
+        <br>
+        <span class="words">compression, condensation, contraction&nbsp;&nbsp;</span><span class="pos">noun</span>&nbsp;&nbsp;
         <br>
         <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
     </div>
@@ -450,6 +496,6 @@
 
 </body>
 
-<script src="{{ url_for('static', filename='wordplay/menu.js') }}"></script>
+<!-- <script src="{{ url_for('static', filename='wordplay/menu.js') }}"></script> -->
 
 </html>
