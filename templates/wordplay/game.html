@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 
+<!-- Wrapping game-stats area. -->
+
 <html lang="en">
 
 <head>
@@ -21,11 +23,6 @@
 
         #path-history {
             margin: 3vw 0;
-        }
-
-        #target {
-            /* color: white; */
-            /* background-color: black; */
         }
 
         .words {
@@ -149,11 +146,6 @@
             text-align: left;
         }
 
-        .last {
-            /* margin-top: 3vw; */
-            /* margin: 0 2vw; */
-        }
-
         .opts {
             /* padding: 0 2vw; */
             background-color: black;
@@ -186,66 +178,47 @@
             opacity: 60%;
         }
 
-        .stats {
-            /* margin-bottom: 3vw; */
+
+
+
+
+
+        .game-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            height: 2em;
+        }
+
+        .x-area, .arrow-area {
             display: flex;
             /* flex-wrap: wrap; */
-            height: 30px;  /* Same as text hp. */
-            justify-content: space-between;
-            /* align-items: center; */
-        }
-
-        .area {
-            flex-wrap: wrap;
-            flex-shrink: 0;
-        }
-
-        .x-area {
-            /* display: inline-block; */
-            display: flex;
-            text-align: left;
-            box-sizing: border-box;
-            /* flex-direction: row; */
-            /* box-sizing: border-box; */
-
-            height: 30px;
-            border: 1px solid white;  /* same as x-area img */
-        }
-        .stats-x-box {
-            display: inline-block;
-            /* display: flex; */
-            /* box-sizing: border-box; */
-            /* text-align: left; */
-            /* aspect-ratio: 1/1; */
-            /* aspect-ratio: 1 / 1; */
             height: 100%;
-            /* width: 30px; */
-            /*  match */
-            /* height: 30px; */
         }
-        .x-area .stats-x-box {
+
+        .x-area, .x-box {
+            box-sizing: border-box;
+            border: 1px solid white;  /* Same as x-area. */
+        }
+
+        .x-box {
+            height: 100%;
             aspect-ratio: 1 / 1;
         }
-        .x-area img {
-            /* box-sizing: border-box;
-            width: 100%;
-            height: 100%; */
-            border: 1px solid white;
-        }
-        .area img {
-            box-sizing: border-box;
-            /* width: 100%; */
+
+        .game-stats img {
             height: 100%;
-            /* border: 1px solid white; */
         }
 
         .arrow-area img {
-            /* margin-left: 4px; */
+            margin-left: 1vw;
         }
 
-        .arrow-area {
-            height: 100%;
-        }
+
+
+
+
+
 
 
         .path-length {
@@ -264,33 +237,25 @@
 
 <body>
 
-    <div class="stats">
+    <div class="game-stats">
 
-        <div class="x-area area">
-            <div class="stats-x-box">
+        <div class="x-area">
+            <div class="x-box">
                 <img src="/static/red_x.png" alt="">
-            </div
-            ><div class="stats-x-box">
+            </div>
+            <div class="x-box">
                 <img src="/static/red_x.png" alt="">
-            </div
-            ><div class="stats-x-box">
+            </div>
+            <div class="x-box">
                 <img style="display: none" src="/static/red_x.png" alt="">
             </div>
         </div>
 
-        <!-- <div class="area arrow-area">
-            <div class="stats-x-box">
-                <img src="/static/arrow_outline.png" alt="">
-            </div
-            ><div class="stats-x-box">
-                <img src="/static/arrow_outline.png" alt="">
-            </div
-            ><div class="stats-x-box">
-                <img src="/static/arrow_outline.png" alt="">
-            </div>
-        </div> -->
-
-        <div class="area arrow-area">
+        <div class="arrow-area">
+            <img src="/static/arrow_outline.png" alt="">
+            <img src="/static/arrow_outline.png" alt="">
+            <img src="/static/arrow_outline.png" alt="">
+            <img src="/static/arrow_outline.png" alt="">
             <img src="/static/arrow_outline.png" alt="">
             <img src="/static/arrow_outline.png" alt="">
             <img src="/static/arrow_outline.png" alt="">
@@ -298,14 +263,12 @@
 
     </div>
 
-    <!-- <div class="flex"> -->
     <div id="path-history">
         <div class="path-history-words"><span class="words">euphonium</span></div>
         <div class="path-history-words"><span class="words">huevos rancheros</span></div>
         <div class="path-history-words"><span class="words">defenestration, murder</span></div>
     </div>
     <div class="path-history-words last"><span class="words">shape, form</span></div>
-    <!-- </div> -->
 
     <div class="flex opts">
 
@@ -313,16 +276,7 @@
 
         <div id="current-choices">
 
-            <!-- <div class="last-row">
-                <div class="path-history-words last"><span class="words">shape, form</span></div>
-            </div> -->
-
-            <!-- <div class="last-row-margin">
-                <div class="black-space"></div>
-            </div> -->
-
             <div class="opt-a-row-container">
-                <!-- <div class="opt-b-mid-space"></div> -->
                 <div id="option-a-text">
                     <span class="pointer">a kind of which is</span>
                     <br>
@@ -340,7 +294,6 @@
                     <br>
                     <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
                 </div>
-                <!-- <div class="opt-a-mid-space"></div> -->
             </div>
 
         </div>
@@ -358,164 +311,6 @@
         <br>
         <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
     </div>
-
-
-<!-- 
-    <div class="flex">
-        <div id="path-history">
-            <div class="path-history-words"><span class="words">euphonium</span></div>
-            <div class="path-history-words"><span class="words">huevos rancheros</span></div>
-            <div class="path-history-words"><span class="words">defenestration, murder</span></div>
-            <div class="last-row">
-                <div class="opt-b-mid-space"></div>
-                <div class="path-history-words last"><span class="words">shape, form</span></div>
-                <div class="opt-a-mid-space"></div>
-            </div>
-            <div class="last-row-margin">
-                <div class="opt-b-mid-space"></div>
-                <div class="black-space"></div>
-                <div class="opt-a-mid-space"></div>
-            </div>
-            </div>
-    </div>
-
-    <div id="current-choices">
-
-        <div class="opt-a-row-container">
-            <div class="opt-b-mid-space"></div>
-            <div id="option-a-text">
-                <span class="pointer">a kind of which is</span>
-                <br>
-                <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>
-                <br>
-                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
-            </div>
-        </div>
-
-        <div class="opt-b-row-container">
-            <div id="option-b-text">
-                <span class="pointer">which is caused by</span>
-                <br>
-                <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>
-                <br>
-                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
-            </div>
-            <div class="opt-a-mid-space"></div>
-        </div>
-
-    </div>
-
-    <div id="target" style="color: hsl(200, 0%, 80%)">
-        <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
-        <br>
-        <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
-    </div> -->
-
-<!-- 
-    <div class="flex">
-        <div class="opt-b-mid-space"></div>
-        <div id="path-history">
-            <div class="path-history-words"><span class="words">euphonium</span></div>
-            <div class="path-history-words"><span class="words">huevos rancheros</span></div>
-            <div class="path-history-words"><span class="words">defenestration, murder</span></div>
-            <div class="path-history-words last"><span class="words">shape, form</span></div>
-        </div>
-        <div class="opt-a-mid-space"></div>
-    </div>
-
-    <div id="current-choices">
-
-        <div class="opt-a-row-container">
-            <div class="opt-b-mid-space"></div>
-            <div id="option-a-text">
-                <span class="pointer">a kind of which is</span>
-                <br>
-                <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>
-                <br>
-                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
-            </div>
-        </div>
-
-        <div class="opt-b-row-container">
-            <div id="option-b-text">
-                <span class="pointer">which is caused by</span>
-                <br>
-                <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>
-                <br>
-                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
-            </div>
-            <div class="opt-a-mid-space"></div>
-        </div>
-
-    </div>
-
-    <div id="target" style="color: hsl(200, 0%, 80%)">
-        <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
-        <br>
-        <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
-    </div> -->
-
-        <!-- <div class="flex target-container">
-        <div class="opt-b-mid-space"></div>
-        <div id="target" style="color: hsl(200, 0%, 80%)">
-            <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
-            <br>
-            <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
-        </div>
-        <div class="opt-a-mid-space"></div>
-    </div> -->
-
-<!-- 
-    <div id="path-history">
-
-        <div class="path-history-words" style="background-color: hsl(150, 100%, 100%); color: hsl(0, 0%, 0%)"><span class="words">euphonium</span></div>
-        <div class="path-history-words" style="background-color: hsl(150, 100%, 100%); color: hsl(0, 0%, 0%)"><span class="words">huevos rancheros</span></div>
-        <div class="path-history-words" style="background-color: hsl(150, 100%, 100%); color: hsl(0, 0%, 0%)"><span class="words">defenestration, murder</span></div>
-        <div class="path-history-words" style="background-color: hsl(200, 100%, 100%); color: hsl(200, 100%, 40%)"><span class="words">shape, form</span></div>
-
-    </div>
-
-    <div id="current-choices">
-
-        <div class="flex">
-            <div class="opt-b-mid-space"></div>
-            <div class="opt-a-mid-space"></div>
-        </div>
-
-        <div class="opt-a-row-container">
-            <div class="opt-b-mid-space"></div>
-            <div id="option-a-text">
-                <span class="pointer">a kind of which is</span>
-                <br>
-                <span class="words">condense, concentrate, contract</span>&nbsp;&nbsp;<span class="pos">verb</span>&nbsp;&nbsp;
-                <br>
-                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
-            </div>
-        </div>
-
-        <div class="opt-b-row-container">
-            <div id="option-b-text">
-                <span class="pointer">which is caused by</span>
-                <br>
-                <span class="words">change</span>&nbsp;&nbsp;<span class="pos">verb</span>&nbsp;&nbsp;
-                <br>
-                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
-            </div>
-            <div class="opt-a-mid-space"></div>
-        </div>
-
-        <div class="flex">
-            <div class="opt-b-mid-space"></div>
-            <div class="opt-a-mid-space"></div>
-        </div>
-
-    </div>
-
-    <div id="target" style="color: hsl(200, 0%, 80%)">
-        <span class="words">compression, condensation, contraction</span>&nbsp;&nbsp;<span class="pos">noun</span>&nbsp;&nbsp;
-        <br>
-        <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
-    </div> -->
 
 </body>
 
