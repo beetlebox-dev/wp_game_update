@@ -1,4 +1,5 @@
 import pickle
+import json
 from wordplay.manage_database import POINTER_SYMBOL_KEY
 from wordplay.game import POINTER_TYPES_TO_IGNORE
 from game import get_depth, curate_game_data
@@ -19,6 +20,14 @@ curated_game_data = curate_game_data(wordnet_data, start_depth, start_hp)
 game_tree = curated_game_data[0]
 start_synset_num = curated_game_data[1]
 target_synset_num = curated_game_data[2]
+
+
+export_data = curated_game_data
+export_data.append(start_hp)
+with open(f"game1.json", "w") as file:
+    json.dump(export_data, file)
+
+
 
 
 print('')

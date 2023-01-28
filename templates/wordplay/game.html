@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 
-<!-- Wrapping stats-bar area. -->
-
 <html lang="en">
 
 <head>
@@ -14,201 +12,120 @@
     <style>
 
         body {
-            background-color: black;
-            font-family: Futura, "Century Gothic", sans-serif;
             margin: 0;
-            text-align: center;
             padding: 3vw;
-        }
-
-
-
-
-
-
-
-
-        /* words */
-
-        .pointer {
-            color: hsl(313, 100%, 50%);
-            font-style: italic;
-        }
-
-        .gloss, .pos, .pointer {
             font-family: 'roboto_light', sans-serif;
-        }
-
-        .pos {
-            font-style: italic;
-            opacity: 60%;
-        }
-
-
-
-
-
-
-
-
-
-        #target {
-            padding: 3vw;
-        }
-
-        #target .words {
-            /* color: white; */
-            color: white;
-        }
-
-        #target {
-            color: hsl(0, 0%, 80%);
-            background-color: hsl(0, 0%, 10%);
-            /* margin: 0 2vw; */
-        }
-
-
-        .target-margin {
-            height: 3vw;
-            border-top: 5px solid white;
-            border-bottom: 5px solid white;
-        }
-
-        /* .black-space {
+            text-align: center;
             background-color: black;
-            flex: 18;
-        } */
-
-
-
-
-
-
+        }
 
         /* Game Stats Bar */
         #stats-bar {
-            background-color: hsl(0, 0%, 20%);
             justify-content: space-between;
+            background-color: hsl(0, 0%, 20%);
         }
-        #stats-bar, #x-area, #arrow-area {
+        #stats-bar, #strike-area, #arrow-area {
             display: flex;
         }
         #stats-bar, #arrow-area {
             flex-wrap: wrap;
         }
-        #x-area, #arrow-area {
+        #strike-area, #arrow-area {
             margin-bottom: 0.6em;
         }
-        .x-box, #x-area img {
+        .strike-box, #strike-area img {
             height: 100%;
         }
-        #x-area, #arrow-area img {
+        #strike-area, #arrow-area img {
             display: flex;
             height: 2em;
         }
-        #x-area, .x-box {
+        #strike-area, .strike-box {
             box-sizing: border-box;
             border: 1px solid white;
         }
-        .x-box {
+        .strike-box {
             aspect-ratio: 1 / 1;
         }
         #arrow-area img {
             margin-left: 1vw;
         }
 
+        /* Synset Text Styling */
+        .words {
+            font-family: Futura, "Century Gothic", sans-serif;
+            font-size: 1.4rem;
+        }
+        .pointer {
+            color: hsl(313, 100%, 50%);
+        }
+        .pointer, .pos {
+            font-style: italic;
+        }
+        .pos {
+            opacity: 50%;
+        }
+        .gloss {
+            opacity: 70%;
+        }
 
         /* Previous/Current Synset Areas */
         #prev-synsets {
             margin: 3vw 0;
             color: hsl(133, 0%, 60%);
-            font-size: 1.2em;
         }
         #curr-synset {
-            padding: 2vw 0;
             border: 5px solid white;
-            color: hsl(313, 100%, 50%);
+            padding: 2vw 0;
             background-color: hsl(0, 0%, 10%);
+            color: hsl(313, 100%, 50%);
         }
 
         /* Next Synset Area */
         #next-synset-area {
             display: flex;
         }
-
-
-
-
-
-
-
-
-
-        #next-syn-b-text {
-            border-left: 5px solid black;
-            /* border-top: 5px solid black; */
-            padding: 3vw 0 3vw 3vw;
+        #next-synsets {
+            flex: 18;
         }
-
-        #next-syn-a-text {
-            border-top: 5px solid black;
-            border-right: 5px solid black;
-            /* border-bottom: 3px solid black; */
-            padding: 3vw 3vw 3vw 0;
-        }
-
-
-        .next-syn-b-text, .next-syn-a-text {
-            display: flex;
-        }
-
         #next-syn-b-gutter, #next-syn-a-gutter {
             flex: 1;
-        }
-
-
-        #target, #next-syn-b-text, #next-syn-a-text {
-            /* padding: 3vw; */
-            box-sizing: border-box;
         }
         #next-synsets .words {
             font-weight: bold;
         }
-        #next-synsets {
-            flex: 18;
-        }
-
-
-        #next-syn-b-gutter, #next-syn-b-text {
-            /* background-color: red; */
-            background-color: hsl(180, 100%, 50%);
-            text-align: right;
-        }
         #next-syn-a-gutter, #next-syn-a-text {
-            /* background-color: red; */
             background-color: hsl(86, 100%, 50%);
+        }
+        #next-syn-b-gutter, #next-syn-b-text {
+            background-color: hsl(180, 100%, 50%);
+        }
+        #next-syn-a-text {
+            border-top: 5px solid black;
+            border-right: 5px solid black;
+            padding: 3vw 3vw 3vw 0;
             text-align: left;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-        .path-length {
-            color: white;
-            font-size: 30px;
+        #next-syn-b-text {
+            border-left: 5px solid black;
+            padding: 3vw 0 3vw 3vw;
+            text-align: right;
         }
 
-        .target-span {
+        /* Target Synset Area */
+        #target-margin {
+            height: 3vw;
+            border-top: 5px solid white;
+            border-bottom: 5px solid white;
+        }
+        #target-heading {
             color: hsl(133, 100%, 80%);
-            /* color: hsl(313, 100%, 50%); */
+        }
+        #target {
+            box-sizing: border-box;
+            padding: 3vw;
+            background-color: hsl(0, 0%, 10%);
+            color: hsl(0, 0%, 100%);
         }
 
     </style>
@@ -219,34 +136,34 @@
 
     <div id="stats-bar">
 
-        <div id="x-area">
-            <div class="x-box">
-                <img src="/static/red_x.png" alt="">
+        <div id="strike-area">
+            <!-- <div class="strike-box">
+                <img src="/static/red_x.png">
             </div>
-            <div class="x-box">
-                <img src="/static/red_x.png" alt="">
+            <div class="strike-box">
+                <img src="/static/red_x.png">
             </div>
-            <div class="x-box">
-                <img src="/static/red_x.png" alt="">
-            </div>
+            <div class="strike-box">
+                <img src="/static/red_x.png">
+            </div> -->
         </div>
 
         <div id="arrow-area">
-            <img src="/static/arrow_outline.png" alt="">
-            <img src="/static/arrow_outline.png" alt="">
-            <img src="/static/arrow_outline.png" alt="">
-            <img src="/static/arrow_outline.png" alt="">
-            <img src="/static/arrow_outline.png" alt="">
-            <img src="/static/arrow_outline.png" alt="">
-            <img src="/static/arrow_outline.png" alt="">
+            <img src="/static/arrow_outline.png">
+            <img src="/static/arrow_outline.png">
+            <img src="/static/arrow_outline.png">
+            <img src="/static/arrow_outline.png">
+            <img src="/static/arrow_outline.png">
+            <img src="/static/arrow_outline.png">
+            <img src="/static/arrow_outline.png">
         </div>
 
     </div>
 
     <div id="prev-synsets">
         <div class="words">euphonium</div>
-        <div>huevos rancheros</div>
-        <div>defenestration, murder, antics</div>
+        <div class="words">huevos rancheros</div>
+        <div class="words">defenestration, murder, antics</div>
     </div>
 
     <div id="curr-synset">
@@ -262,7 +179,7 @@
             <div id="next-syn-b-text">
                 <span class="pointer">a kind of which is</span>
                 <br>
-                <span class="words">condense, concentrate, contract&nbsp;&nbsp;</span><span class="pos">verb</span>
+                <span class="words">condense, concentrate, contract </span><span class="pos">verb</span>
                 <br>
                 <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
             </div>
@@ -270,7 +187,7 @@
             <div id="next-syn-a-text">
                 <span class="pointer">which is caused by</span>
                 <br>
-                <span class="words">change&nbsp;&nbsp;</span><span class="pos">verb</span>
+                <span class="words">change </span><span class="pos">verb</span>
                 <br>
                 <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
             </div>
@@ -281,12 +198,12 @@
 
     </div>
 
-    <div class="target-margin"></div>
+    <div id="target-margin"></div>
 
     <div id="target">
-        <span class="target-span">TARGET</span>
+        <span id="target-heading">TARGET</span>
         <br>
-        <span class="words">compression, condensation, contraction&nbsp;&nbsp;</span><span class="pos">noun</span>&nbsp;&nbsp;
+        <span class="words">compression, condensation, contraction </span><span class="pos">noun</span>&nbsp;&nbsp;
         <br>
         <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
     </div>
@@ -294,5 +211,214 @@
 </body>
 
 <!-- <script src="{{ url_for('static', filename='wordplay/menu.js') }}"></script> -->
+
+<script>
+
+
+
+
+
+
+const pointer_key = {
+    '^': 'which is related to',  // non-reflexive
+    // '__start': {'name': 'start', 'phrase': '(start marker)',  // custom pointer type
+    // '__end': {'name': 'end', 'phrase': '(end marker)',  // custom pointer type
+    '?p': 'which is the same word as',  // custom pointer type  // self-reflexive
+    '!': 'which is the opposite of',  // self-reflexive
+    '&': 'which is similar to',  // self-reflexive
+    '$': 'which is a related verb to',  // self-reflexive
+    '=': 'which is a value or attribute of',  // self-reflexive
+    '+': 'which has the same root form as',  // self-reflexive
+    // Remaining pointers are ordered with reflexive pointers paired together.
+    '@': 'which is a kind of',
+    '~': 'a kind of which is',
+    '@i': 'which is an instance of',
+    '~i': 'an instance of which is',
+    '#m': 'which is a member of',
+    '%m': 'a member of which is',
+    '#s': 'which is a substance of',
+    '%s': 'a substance of which is',
+    '#p': 'which is a part of',
+    '%p': 'a part of which is',
+    ';c': 'which is associated with the category',
+    '-c': 'which is a category sometimes associated with',
+    ';r':'which is associated with the region',
+    '-r': 'which is a region sometimes associated with',
+    ';u': 'which is associated with the usage',
+    '-u': 'which is a usage sometimes associated with',
+    '<': 'which is an adjective derived from the verb',
+    '<x': 'which is the root verb for the adjective',
+    // custom reflex pointer (above)
+    '\\': 'which is of or pertaining to',
+    '\\x': 'which is the basis for',  // custom reflex pointer
+    '*': 'which cannot be done without',
+    '*x': 'which is always done with',  // custom reflex pointer
+    '>': 'which is caused by',
+    '>x': 'which can cause',  // custom reflex pointer
+};
+
+
+const gameData = [[[{"2": "~"}, {"3": "~", "4": "~"}, ["trait"], "noun", "a distinguishing feature of your personal nature"], [{}, {}, ["unmindful", "forgetful", "mindless"], "adj", "not mindful or attentive; \"while thus unmindful of his steps he stumbled\"- G.B.Shaw"], [{"5": "~", "6": "~"}, {"7": "+", "8": "~"}, ["attentiveness"], "noun", "the trait of being observant and paying attention"], [{"7": "+"}, {"14": "#p", "15": "="}, ["thoughtfulness"], "noun", "the trait of thinking carefully before acting"], [{"0": "@"}, {"9": "~", "10": "~"}, ["drive"], "noun", "the trait of being highly motivated; \"his drive and energy exhausted his co-workers\""], [{"1": "="}, {}, ["mindfulness", "heedfulness"], "noun", "the trait of staying aware of (paying close attention to) your responsibilities"], [{"1": "+"}, {}, ["unmindfulness", "heedlessness", "inadvertence", "inadvertency"], "noun", "the trait of forgetting or ignoring your responsibilities"], [{"5": "+"}, {"16": "+", "17": "="}, ["heedful", "attentive", "thoughtful", "paying_attention"], "adj", "taking heed; giving close and thoughtful attention; \"heedful of the warnings\"; \"so heedful a writer\"; \"heedful of what they were doing\""], [{"11": "+", "2": "@"}, {"12": "+", "13": "+"}, ["caution", "cautiousness", "carefulness"], "noun", "the trait of being cautious; being attentive to possible danger; \"a man of caution\""], [{}, {}, ["energy", "push", "get-up-and-go"], "noun", "enterprising or ambitious drive; \"Europeans often laugh at American energy\""], [{}, {}, ["action"], "noun", "the trait of being active and energetic and forceful; \"a man of action\""], [{"5": "+"}, {"18": "&", "19": "\\x"}, ["careful", "heedful"], "adj", "cautiously attentive; \"careful of her feelings\"; \"heedful of his father's advice\""], [{}, {}, ["cautious"], "adj", "showing careful forethought; \"reserved and cautious; never making swift decisions\"; \"a cautious driver\""], [{}, {}, ["careful", "thrifty"], "adj", "mindful of the future in spending money; \"careful with money\""], [{}, {}, ["character", "fiber", "fibre"], "noun", "the inherent complex of attributes that determines a persons moral and ethical actions and reactions; \"education has for its object the formation of character\"- Herbert Spencer"], [{}, {}, ["thoughtful"], "adj", "exhibiting or characterized by careful thought; \"a thoughtful paper\""], [{}, {}, ["attend", "hang", "advert", "pay_heed", "give_ear"], "verb", "give heed (to); \"The children in the audience attended the recital quietly\"; \"She hung on his every word\"; \"They attended to everything he said\""], [{}, {}, ["attentiveness", "heed", "regard", "paying_attention"], "noun", "paying particular notice (as to children or helpless people); \"his attentiveness to her wishes\"; \"he spends without heed to the consequences\""], [{}, {}, ["mindful", "aware"], "adj", "bearing in mind; attentive to; \"ever mindful of her health\"; \"mindful of his responsibilities\"; \"mindful of these criticisms, I shall attempt to justify my action\""], [{}, {}, ["mindfully", "heedfully", "advertently"], "adv", "in a careful deliberate manner"]], 0, 1, 2];
+const gameGraph = gameData[0]
+const startSynsetIndex = gameData[1]
+const targetSynsetIndex = gameData[2]
+const totalStrikes = gameData[3]
+
+
+
+// let currentSynsetIndex = startSynsetIndex;
+let currentSynsetIndex = 2;
+let nextSynsetIndexA = 3;
+let nextSynsetIndexB = 4;
+
+let currentStrikes = 0;
+
+
+
+const strikeArea = document.getElementById('strike-area');
+
+
+for (let strikeCount = 0; strikeCount < totalStrikes; strikeCount++) {
+    const newStrikeBox = document.createElement('div');
+    newStrikeBox.id = (`strike-box-${strikeCount + 1}`);
+    newStrikeBox.classList.add('strike-box');
+    strikeArea.appendChild(newStrikeBox);
+};
+
+
+
+
+function asdf() {
+
+    // <div id="strike-area">
+    //         <div class="strike-box">
+    //             <img src="/static/red_x.png">
+
+    // const fragment = document.createDocumentFragment();
+    // const li = fragment
+    // .appendChild(document.createElement('section'))
+    // .appendChild(document.createElement('ul'))
+    // .appendChild(document.createElement('li'));
+    // li.textContent = 'hello world';
+    // document.body.appendChild(fragment);
+
+    currentStrikes += 1;
+    const strikeBox = document.getElementById(`strike-box-${currentStrikes}`)
+    const newX = document.createElement('img');
+    newX.src = '/static/red_x.png';
+    strikeBox.appendChild(newX);
+
+    const arrowArea = document.getElementById('arrow-area');
+    const newArrow = document.createElement('img');
+    newArrow.src = '/static/arrow_outline.png';
+    arrowArea.appendChild(newArrow);
+
+
+    const prevSynsets = document.getElementById('prev-synsets');
+    const synsetToAdd = document.createElement('div');
+    const wordsArray = gameGraph[currentSynsetIndex][2];
+    synsetToAdd.innerHTML = wordsStrFromArray(wordsArray);
+    synsetToAdd.classList.add('words');
+    prevSynsets.appendChild(synsetToAdd);
+
+};
+
+
+
+window.addEventListener('keydown', () => {
+    asdf();
+});
+
+const choiceAreaA = document.getElementById('next-syn-a-text');
+choiceAreaA.addEventListener('click', () => {
+
+    const pointerSpanA = document.querySelector('#next-syn-a-text span.pointer');
+    const pointerSpanB = document.querySelector('#next-syn-b-text span.pointer');
+    const wordsSpanA = document.querySelector('#next-syn-a-text span.words');
+    const wordsSpanB = document.querySelector('#next-syn-b-text span.words');
+    const posSpanA = document.querySelector('#next-syn-a-text span.pos');
+    const posSpanB = document.querySelector('#next-syn-b-text span.pos');
+    const glossSpanA = document.querySelector('#next-syn-a-text span.gloss');
+    const glossSpanB = document.querySelector('#next-syn-b-text span.gloss');
+
+    currentSynsetIndex = nextSynsetIndexA;
+    const currentSynsetData = gameGraph[currentSynsetIndex];
+    const currSynsetSpan = document.querySelector('#curr-synset span');
+    currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
+
+    // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
+
+    nextSynsetIndexA = Object.keys(currentSynsetData[0])[0];
+    const firstCorrectSynPointerSym = currentSynsetData[0][nextSynsetIndexA];
+    pointerSpanA.innerHTML = pointer_key[firstCorrectSynPointerSym];
+    wordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexA][2]);
+    wordsSpanA.innerHTML = `${wordsStr} `;
+    posSpanA.innerHTML = gameGraph[nextSynsetIndexA][3];
+    glossSpanA.innerHTML = gameGraph[nextSynsetIndexA][4];
+
+    nextSynsetIndexB = Object.keys(currentSynsetData[1])[0];
+    const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
+    pointerSpanB.innerHTML = pointer_key[firstDecoySynPointerSym];
+    wordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
+    wordsSpanB.innerHTML = `${wordsStr} `;
+    // wordsSpanA.innerHTML = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
+    posSpanB.innerHTML = gameGraph[nextSynsetIndexB][3];
+    glossSpanB.innerHTML = gameGraph[nextSynsetIndexB][4];
+
+});
+
+
+const choiceAreaB = document.getElementById('next-syn-b-text');
+choiceAreaB.addEventListener('click', () => {
+
+    const pointerSpanA = document.querySelector('#next-syn-a-text span.pointer');
+    const pointerSpanB = document.querySelector('#next-syn-b-text span.pointer');
+    const wordsSpanA = document.querySelector('#next-syn-a-text span.words');
+    const wordsSpanB = document.querySelector('#next-syn-b-text span.words');
+    const posSpanA = document.querySelector('#next-syn-a-text span.pos');
+    const posSpanB = document.querySelector('#next-syn-b-text span.pos');
+    const glossSpanA = document.querySelector('#next-syn-a-text span.gloss');
+    const glossSpanB = document.querySelector('#next-syn-b-text span.gloss');
+
+    currentSynsetIndex = nextSynsetIndexB;
+    const currentSynsetData = gameGraph[currentSynsetIndex];
+    const currSynsetSpan = document.querySelector('#curr-synset span');
+    currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
+
+    // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
+
+    nextSynsetIndexA = Object.keys(currentSynsetData[0])[0];
+    const firstCorrectSynPointerSym = currentSynsetData[0][nextSynsetIndexA];
+    pointerSpanA.innerHTML = pointer_key[firstCorrectSynPointerSym];
+    wordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexA][2]);
+    wordsSpanA.innerHTML = `${wordsStr} `;
+    posSpanA.innerHTML = gameGraph[nextSynsetIndexA][3];
+    glossSpanA.innerHTML = gameGraph[nextSynsetIndexA][4];
+
+    nextSynsetIndexB = Object.keys(currentSynsetData[1])[0];
+    const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
+    pointerSpanB.innerHTML = pointer_key[firstDecoySynPointerSym];
+    wordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
+    wordsSpanB.innerHTML = `${wordsStr} `;
+    // wordsSpanA.innerHTML = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
+    posSpanB.innerHTML = gameGraph[nextSynsetIndexB][3];
+    glossSpanB.innerHTML = gameGraph[nextSynsetIndexB][4];
+
+});
+
+
+
+
+
+function wordsStrFromArray(wordsArray) {
+    let synsetWordString = '';
+    for (let wordNum = 0; wordNum < wordsArray.length; wordNum++) {
+        if (wordNum > 0) synsetWordString += ', ';
+        synsetWordString += wordsArray[wordNum];
+    };
+    return synsetWordString;
+};
+
+</script>
 
 </html>
