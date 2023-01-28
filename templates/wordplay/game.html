@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<!-- Wrapping game-stats area. -->
+<!-- Wrapping stats-bar area. -->
 
 <html lang="en">
 
@@ -21,152 +21,18 @@
             padding: 3vw;
         }
 
-        #path-history {
-            margin: 3vw 0;
-        }
 
-        .words {
-            /* font-family: Futura, "Century Gothic", sans-serif; */
-            font-size: 1.2em;
-        }
 
-        #option-a-text {
-            border-left: 5px solid black;
-            /* border-top: 5px solid black; */
-            padding: 3vw 0 3vw 3vw;
-        }
 
-        #option-b-text {
-            border-top: 5px solid black;
-            border-right: 5px solid black;
-            /* border-bottom: 3px solid black; */
-            padding: 3vw 3vw 3vw 0;
-        }
 
-        #target {
-            padding: 3vw;
-        }
 
-        #target, #option-a-text, #option-b-text {
-            /* padding: 3vw; */
-            box-sizing: border-box;
-        }
 
-        .path-history-words {
-            /* text-align: left; */
-            /* padding: 0.5vw 3vw; */
-            color: hsl(133, 0%, 60%);
-        }
 
-        .last-row {
-            display: flex;
-        }
-
-        #path-history, #target {
-            background-color: black;
-            /* color: white; */
-            /* background-color: hsl(133, 100%, 5%); */
-            /* color: white; */
-        }
-
-        #target {
-            color: hsl(0, 0%, 80%);
-            background-color: hsl(0, 0%, 10%);
-            /* margin: 0 2vw; */
-        }
-
-        #target .words {
-            /* color: white; */
-            color: white;
-        }
-
-        #current-choices {
-            flex: 18;
-        }
-
-        #current-choices .words {
-            font-weight: bold;
-        }
-
-        .opt-a-row-container, .opt-b-row-container, .flex {
-            display: flex;
-        }
-
-        .flex {
-            display: flex;
-            /* height: 10vw; */
-        }
-
-        .opt-a-mid-space, .opt-b-mid-space {
-            flex: 1;
-        }
-
-        .target-margin {
-            height: 3vw;
-            border-top: 5px solid white;
-            border-bottom: 5px solid white;
-        }
-
-        .last-row-margin {
-            display: flex;
-            height: 2vw;
-        }
-
-        .black-space {
-            background-color: black;
-            flex: 18;
-        }
-
-        #target, #path-history {
-            flex: 18;
-        }
-
-        .last {
-            padding: 2vw 0;
-            border: 5px solid white;
-            flex: 18;
-            color: hsl(313, 100%, 50%);
-            /* background-color: black; */
-            background-color: hsl(0, 0%, 10%);
-            /* background-color: hsl(133, 100%, 10%); */
-            /* background-color: black; */
-            /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), black, hsl(180, 100%, 50%)); */
-            /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), black 20%, black 80%, hsl(180, 100%, 50%) 100%); */
-            /* background-image: linear-gradient(to right, hsl(86, 100%, 50%), hsl(133, 100%, 8%) 20%, hsl(133, 100%, 8%) 80%, hsl(180, 100%, 50%) 100%); */
-        }
-
-        .opt-a-mid-space, #option-a-text {
-            /* background-color: red; */
-            background-color: hsl(180, 100%, 50%);
-            text-align: right;
-        }
-        .opt-b-mid-space, #option-b-text {
-            /* background-color: red; */
-            background-color: hsl(86, 100%, 50%);
-            text-align: left;
-        }
-
-        .opts {
-            /* padding: 0 2vw; */
-            background-color: black;
-        }
-
-        .opt-b-row-container .opt-a-mid-space, .target-container .opt-a-mid-space  {
-            /* background-color: hsl(180, 100%, 25%); */
-            /* background-color: hsl(180, 100%, 70%);
-            background-color: hsl(86, 100%, 70%); */
-        }
-
-        #option-a-text, #option-b-text {
-            flex: 19;
-        }
+        /* words */
 
         .pointer {
             color: hsl(313, 100%, 50%);
             font-style: italic;
-
-            /* color: white; */
-            /* opacity: 70%; */
         }
 
         .gloss, .pos, .pointer {
@@ -183,36 +49,150 @@
 
 
 
-        .game-stats {
-            display: flex;
-            flex-wrap: wrap;
+
+
+
+        #target {
+            padding: 3vw;
+        }
+
+        #target .words {
+            /* color: white; */
+            color: white;
+        }
+
+        #target {
+            color: hsl(0, 0%, 80%);
+            background-color: hsl(0, 0%, 10%);
+            /* margin: 0 2vw; */
+        }
+
+
+        .target-margin {
+            height: 3vw;
+            border-top: 5px solid white;
+            border-bottom: 5px solid white;
+        }
+
+        /* .black-space {
+            background-color: black;
+            flex: 18;
+        } */
+
+
+
+
+
+
+
+        /* Game Stats Bar */
+        #stats-bar {
+            background-color: hsl(0, 0%, 20%);
             justify-content: space-between;
+        }
+        #stats-bar, #x-area, #arrow-area {
+            display: flex;
+        }
+        #stats-bar, #arrow-area {
+            flex-wrap: wrap;
+        }
+        #x-area, #arrow-area {
+            margin-bottom: 0.6em;
+        }
+        .x-box, #x-area img {
+            height: 100%;
+        }
+        #x-area, #arrow-area img {
+            display: flex;
             height: 2em;
         }
-
-        .x-area, .arrow-area {
-            display: flex;
-            /* flex-wrap: wrap; */
-            height: 100%;
-        }
-
-        .x-area, .x-box {
+        #x-area, .x-box {
             box-sizing: border-box;
-            border: 1px solid white;  /* Same as x-area. */
+            border: 1px solid white;
         }
-
         .x-box {
-            height: 100%;
             aspect-ratio: 1 / 1;
         }
-
-        .game-stats img {
-            height: 100%;
-        }
-
-        .arrow-area img {
+        #arrow-area img {
             margin-left: 1vw;
         }
+
+
+        /* Previous/Current Synset Areas */
+        #prev-synsets {
+            margin: 3vw 0;
+            color: hsl(133, 0%, 60%);
+            font-size: 1.2em;
+        }
+        #curr-synset {
+            padding: 2vw 0;
+            border: 5px solid white;
+            color: hsl(313, 100%, 50%);
+            background-color: hsl(0, 0%, 10%);
+        }
+
+        /* Next Synset Area */
+        #next-synset-area {
+            display: flex;
+        }
+
+
+
+
+
+
+
+
+
+        #next-syn-b-text {
+            border-left: 5px solid black;
+            /* border-top: 5px solid black; */
+            padding: 3vw 0 3vw 3vw;
+        }
+
+        #next-syn-a-text {
+            border-top: 5px solid black;
+            border-right: 5px solid black;
+            /* border-bottom: 3px solid black; */
+            padding: 3vw 3vw 3vw 0;
+        }
+
+
+        .next-syn-b-text, .next-syn-a-text {
+            display: flex;
+        }
+
+        #next-syn-b-gutter, #next-syn-a-gutter {
+            flex: 1;
+        }
+
+
+        #target, #next-syn-b-text, #next-syn-a-text {
+            /* padding: 3vw; */
+            box-sizing: border-box;
+        }
+        #next-synsets .words {
+            font-weight: bold;
+        }
+        #next-synsets {
+            flex: 18;
+        }
+
+
+        #next-syn-b-gutter, #next-syn-b-text {
+            /* background-color: red; */
+            background-color: hsl(180, 100%, 50%);
+            text-align: right;
+        }
+        #next-syn-a-gutter, #next-syn-a-text {
+            /* background-color: red; */
+            background-color: hsl(86, 100%, 50%);
+            text-align: left;
+        }
+
+
+
+
 
 
 
@@ -237,9 +217,9 @@
 
 <body>
 
-    <div class="game-stats">
+    <div id="stats-bar">
 
-        <div class="x-area">
+        <div id="x-area">
             <div class="x-box">
                 <img src="/static/red_x.png" alt="">
             </div>
@@ -247,11 +227,11 @@
                 <img src="/static/red_x.png" alt="">
             </div>
             <div class="x-box">
-                <img style="display: none" src="/static/red_x.png" alt="">
+                <img src="/static/red_x.png" alt="">
             </div>
         </div>
 
-        <div class="arrow-area">
+        <div id="arrow-area">
             <img src="/static/arrow_outline.png" alt="">
             <img src="/static/arrow_outline.png" alt="">
             <img src="/static/arrow_outline.png" alt="">
@@ -263,42 +243,41 @@
 
     </div>
 
-    <div id="path-history">
-        <div class="path-history-words"><span class="words">euphonium</span></div>
-        <div class="path-history-words"><span class="words">huevos rancheros</span></div>
-        <div class="path-history-words"><span class="words">defenestration, murder</span></div>
+    <div id="prev-synsets">
+        <div class="words">euphonium</div>
+        <div>huevos rancheros</div>
+        <div>defenestration, murder, antics</div>
     </div>
-    <div class="path-history-words last"><span class="words">shape, form</span></div>
 
-    <div class="flex opts">
+    <div id="curr-synset">
+        <span class="words">shape, form</span>
+    </div>
 
-        <div class="opt-b-mid-space"></div>
+    <div id="next-synset-area">
 
-        <div id="current-choices">
+        <div id="next-syn-a-gutter"></div>
 
-            <div class="opt-a-row-container">
-                <div id="option-a-text">
-                    <span class="pointer">a kind of which is</span>
-                    <br>
-                    <span class="words">condense, concentrate, contract&nbsp;&nbsp;</span><span class="pos">verb</span>
-                    <br>
-                    <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
-                </div>
+        <div id="next-synsets">
+
+            <div id="next-syn-b-text">
+                <span class="pointer">a kind of which is</span>
+                <br>
+                <span class="words">condense, concentrate, contract&nbsp;&nbsp;</span><span class="pos">verb</span>
+                <br>
+                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
             </div>
 
-            <div class="opt-b-row-container">
-                <div id="option-b-text">
-                    <span class="pointer">which is caused by</span>
-                    <br>
-                    <span class="words">change&nbsp;&nbsp;</span><span class="pos">verb</span>
-                    <br>
-                    <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
-                </div>
+            <div id="next-syn-a-text">
+                <span class="pointer">which is caused by</span>
+                <br>
+                <span class="words">change&nbsp;&nbsp;</span><span class="pos">verb</span>
+                <br>
+                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
             </div>
 
         </div>
 
-        <div class="opt-a-mid-space"></div>
+        <div id="next-syn-b-gutter"></div>
 
     </div>
 
