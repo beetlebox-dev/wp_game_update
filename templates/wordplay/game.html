@@ -22,7 +22,6 @@
         /* Game Stats Bar */
         #stats-bar {
             justify-content: space-between;
-            background-color: hsl(0, 0%, 20%);
         }
         #stats-bar, #strike-area, #arrow-area {
             display: flex;
@@ -139,31 +138,17 @@
         <div id="strike-area">
             <!-- <div class="strike-box">
                 <img src="/static/red_x.png">
-            </div>
-            <div class="strike-box">
-                <img src="/static/red_x.png">
-            </div>
-            <div class="strike-box">
-                <img src="/static/red_x.png">
             </div> -->
         </div>
 
         <div id="arrow-area">
-            <img src="/static/arrow_outline.png">
-            <img src="/static/arrow_outline.png">
-            <img src="/static/arrow_outline.png">
-            <img src="/static/arrow_outline.png">
-            <img src="/static/arrow_outline.png">
-            <img src="/static/arrow_outline.png">
-            <img src="/static/arrow_outline.png">
+            <!-- <img src="/static/arrow_outline.png"> -->
         </div>
 
     </div>
 
     <div id="prev-synsets">
-        <div class="words">euphonium</div>
-        <div class="words">huevos rancheros</div>
-        <div class="words">defenestration, murder, antics</div>
+        <!-- <div class="words">apple, air potato</div> -->
     </div>
 
     <div id="curr-synset">
@@ -267,10 +252,7 @@ const totalStrikes = gameData[3]
 
 
 // let currentSynsetIndex = startSynsetIndex;
-let currentSynsetIndex = 2;
-let pointerIndex = 3;
-let nextSynsetIndexB = 4;
-
+let currentSynsetIndex
 let currentStrikes = 0;
 
 
@@ -312,80 +294,94 @@ for (const aOrB of ['a', 'b']) {
     const areaId = `#next-syn-${aOrB}-text`;
     nextSynsObj[aOrB] = {
         index: startingPointers[aOrB]['index'],
-        elem: document.querySelector(areaId),
+        area: document.querySelector(areaId),
         pointer: document.querySelector(`${areaId} span.pointer`),
         words: document.querySelector(`${areaId} span.words`),
         pos: document.querySelector(`${areaId} span.pos`),
         gloss: document.querySelector(`${areaId} span.gloss`),
     };
+};
+
+choose();
 
 
+function choose(aOrB=null) {  // If aOrB is null or not passed, currentSynsetIndex is initialized as the start synset.
 
-    // Need to fully cycle through above before ready for below. Make separate loops. !@#$!@#$!@#$ working here.
+    console.log(currentSynsetIndex)
 
+    if (aOrB !== null) {
 
-    nextSynsObj[aOrB]['elem'].addEventListener('click', () => {
+        // Add current synset to previous synset list.
+        const prevSynsets = document.getElementById('prev-synsets');
+        const synsetToAdd = document.createElement('div');
+        const wordsArray = gameGraph[currentSynsetIndex][2];
+        synsetToAdd.innerHTML = wordsStrFromArray(wordsArray);
+        synsetToAdd.classList.add('words');
+        prevSynsets.appendChild(synsetToAdd);
 
         currentSynsetIndex = nextSynsObj[aOrB]['index'];
-        const newCurrentWords = gameGraph[currentSynsetIndex][2];
-        const currSynsetSpan = document.querySelector('#curr-synset span');
-        currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
 
-        // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
+    } else {  // Init.
+        currentSynsetIndex = startSynsetIndex;
+        document.querySelector('#target span.words').innerHTML = wordsStrFromArray(gameGraph[targetSynsetIndex][2]);
+        document.querySelector('#target span.pos').innerHTML = gameGraph[targetSynsetIndex][3];
+        document.querySelector('#target span.gloss').innerHTML = gameGraph[targetSynsetIndex][4];
+    };
+    const currSynsetSpan = document.querySelector('#curr-synset span');
+    const newCurrentWords = gameGraph[currentSynsetIndex][2];
+    currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
 
-        const newPointers = getPointers(currentSynsetIndex);
-        for (const newAorB of ['a', 'b']) {
-            nextSynsObj[newAorB]['index'] = newPointers[newAorB]['index'];
-            nextSynsObj[newAorB]['pointer'].innerHTML = newPointers[newAorB]['pointer'];
-            nextSynsObj[newAorB]['words'].innerHTML = newPointers[newAorB]['words'];
-            nextSynsObj[newAorB]['pos'].innerHTML = newPointers[newAorB]['pos'];
-            nextSynsObj[newAorB]['gloss'].innerHTML = newPointers[newAorB]['gloss'];
-        };
+    // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
+
+    const newPointers = getPointers(currentSynsetIndex);
+    for (const newAorB of ['a', 'b']) {
+        nextSynsObj[newAorB]['index'] = newPointers[newAorB]['index'];
+        nextSynsObj[newAorB]['pointer'].innerHTML = newPointers[newAorB]['pointer'];
+        nextSynsObj[newAorB]['words'].innerHTML = `${newPointers[newAorB]['words']} `;
+        nextSynsObj[newAorB]['pos'].innerHTML = newPointers[newAorB]['pos'];
+        nextSynsObj[newAorB]['gloss'].innerHTML = newPointers[newAorB]['gloss'];
+    };
+
+    // Add arrow.
+    const arrowArea = document.getElementById('arrow-area');
+    const newArrow = document.createElement('img');
+    newArrow.src = '/static/arrow_outline.png';
+    arrowArea.appendChild(newArrow);
+
+    if (aOrB === 'b') {
+        // Add strike.
+        currentStrikes += 1;
+        const strikeBox = document.getElementById(`strike-box-${currentStrikes}`)
+        const newX = document.createElement('img');
+        newX.src = '/static/red_x.png';
+        strikeBox.appendChild(newX);
+    };
+};
 
 
-        // pointerIndex = null;
-        // let correctPointerPhrase = 'pointer';
-        // let correctWordsStr = 'words';
-        // let correctPosStr = 'pos';
-        // let correctGlossStr = 'gloss';
-        // const allCorrectPointers = Object.keys(newCurrentWords[0]);
-        // if (allCorrectPointers.length > 0) {
-        //     pointerIndex = allCorrectPointers[0];
-        //     const firstCorrectSynPointerSym = newCurrentWords[0][pointerIndex];
-        //     correctPointerPhrase = pointer_key[firstCorrectSynPointerSym];
-        //     correctWordsStr = wordsStrFromArray(gameGraph[pointerIndex][2]);
-        //     correctPosStr = gameGraph[pointerIndex][3];
-        //     correctGlossStr = gameGraph[pointerIndex][4];
+for (const aOrB of ['a', 'b']) {
+
+    nextSynsObj[aOrB]['area'].addEventListener('click', () => choose(aOrB));
+
+
+    // nextSynsObj[aOrB]['area'].addEventListener('click', () => {
+
+        // currentSynsetIndex = nextSynsObj[aOrB]['index'];
+        // const currSynsetSpan = document.querySelector('#curr-synset span');
+        // const newCurrentWords = gameGraph[currentSynsetIndex][2];
+        // currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
+
+        // // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
+
+        // const newPointers = getPointers(currentSynsetIndex);
+        // for (const newAorB of ['a', 'b']) {
+        //     nextSynsObj[newAorB]['index'] = newPointers[newAorB]['index'];
+        //     nextSynsObj[newAorB]['pointer'].innerHTML = newPointers[newAorB]['pointer'];
+        //     nextSynsObj[newAorB]['words'].innerHTML = newPointers[newAorB]['words'];
+        //     nextSynsObj[newAorB]['pos'].innerHTML = newPointers[newAorB]['pos'];
+        //     nextSynsObj[newAorB]['gloss'].innerHTML = newPointers[newAorB]['gloss'];
         // };
-        // pointerSpanA.innerHTML = correctPointerPhrase;
-        // wordsSpanA.innerHTML = `${correctWordsStr} `;
-        // posSpanA.innerHTML = correctPosStr;
-        // glossSpanA.innerHTML = correctGlossStr;
-
-
-
-        // nextSynsetIndexB = null;
-        // let decoyPointerPhrase = 'pointer';
-        // let decoyWordsStr = 'words';
-        // let decoyPosStr = 'pos';
-        // let decoyGlossStr = 'gloss';
-        // const allDecoyPointers = Object.keys(newCurrentWords[1]);
-        // if (allDecoyPointers.length > 0) {
-        //     nextSynsetIndexB = allDecoyPointers[0];
-        //     const firstDecoySynPointerSym = newCurrentWords[1][nextSynsetIndexB];
-        //     decoyPointerPhrase = pointer_key[firstDecoySynPointerSym];
-        //     decoyWordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
-        //     decoyPosStr = gameGraph[nextSynsetIndexB][3];
-        //     decoyGlossStr = gameGraph[nextSynsetIndexB][4];
-        // };
-        // pointerSpanB.innerHTML = decoyPointerPhrase;
-        // wordsSpanB.innerHTML = `${decoyWordsStr} `;
-        // posSpanB.innerHTML = decoyPosStr;
-        // glossSpanB.innerHTML = decoyGlossStr;
-
-    });
-
-
+    // });
 };
 
 
@@ -396,7 +392,6 @@ for (const aOrB of ['a', 'b']) {
 
 
 const strikeArea = document.getElementById('strike-area');
-
 for (let strikeCount = 0; strikeCount < totalStrikes; strikeCount++) {
     const newStrikeBox = document.createElement('div');
     newStrikeBox.id = (`strike-box-${strikeCount + 1}`);
@@ -407,46 +402,27 @@ for (let strikeCount = 0; strikeCount < totalStrikes; strikeCount++) {
 
 
 
-function asdf() {
+// function asdf() {
 
-    // <div id="strike-area">
-    //         <div class="strike-box">
-    //             <img src="/static/red_x.png">
+//     // <div id="strike-area">
+//     //         <div class="strike-box">
+//     //             <img src="/static/red_x.png">
 
-    // const fragment = document.createDocumentFragment();
-    // const li = fragment
-    // .appendChild(document.createElement('section'))
-    // .appendChild(document.createElement('ul'))
-    // .appendChild(document.createElement('li'));
-    // li.textContent = 'hello world';
-    // document.body.appendChild(fragment);
+//     // const fragment = document.createDocumentFragment();
+//     // const li = fragment
+//     // .appendChild(document.createElement('section'))
+//     // .appendChild(document.createElement('ul'))
+//     // .appendChild(document.createElement('li'));
+//     // li.textContent = 'hello world';
+//     // document.body.appendChild(fragment);
 
-    currentStrikes += 1;
-    const strikeBox = document.getElementById(`strike-box-${currentStrikes}`)
-    const newX = document.createElement('img');
-    newX.src = '/static/red_x.png';
-    strikeBox.appendChild(newX);
-
-    const arrowArea = document.getElementById('arrow-area');
-    const newArrow = document.createElement('img');
-    newArrow.src = '/static/arrow_outline.png';
-    arrowArea.appendChild(newArrow);
-
-
-    const prevSynsets = document.getElementById('prev-synsets');
-    const synsetToAdd = document.createElement('div');
-    const wordsArray = gameGraph[currentSynsetIndex][2];
-    synsetToAdd.innerHTML = wordsStrFromArray(wordsArray);
-    synsetToAdd.classList.add('words');
-    prevSynsets.appendChild(synsetToAdd);
-
-};
+// };
 
 
 
-window.addEventListener('keydown', () => {
-    asdf();
-});
+// window.addEventListener('keydown', () => {
+//     asdf();
+// });
 
 
 
@@ -456,96 +432,96 @@ window.addEventListener('keydown', () => {
 
 
 
-const choiceAreaA = document.getElementById('next-syn-a-text');
-choiceAreaA.addEventListener('click', () => {
+// const choiceAreaA = document.getElementById('next-syn-a-text');
+// choiceAreaA.addEventListener('click', () => {
 
-    currentSynsetIndex = pointerIndex;
-    const currentSynsetData = gameGraph[currentSynsetIndex];
-    const currSynsetSpan = document.querySelector('#curr-synset span');
-    currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
+//     currentSynsetIndex = pointerIndex;
+//     const currentSynsetData = gameGraph[currentSynsetIndex];
+//     const currSynsetSpan = document.querySelector('#curr-synset span');
+//     currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
 
-    // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
+//     // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
 
-    pointerIndex = null;
-    let correctPointerPhrase = 'pointer';
-    let correctWordsStr = 'words';
-    let correctPosStr = 'pos';
-    let correctGlossStr = 'gloss';
-    const allCorrectPointers = Object.keys(currentSynsetData[0]);
-    if (allCorrectPointers.length > 0) {
-        pointerIndex = allCorrectPointers[0];
-        const firstCorrectSynPointerSym = currentSynsetData[0][pointerIndex];
-        correctPointerPhrase = pointer_key[firstCorrectSynPointerSym];
-        correctWordsStr = wordsStrFromArray(gameGraph[pointerIndex][2]);
-        correctPosStr = gameGraph[pointerIndex][3];
-        correctGlossStr = gameGraph[pointerIndex][4];
-    };
-    pointerSpanA.innerHTML = correctPointerPhrase;
-    wordsSpanA.innerHTML = `${correctWordsStr} `;
-    posSpanA.innerHTML = correctPosStr;
-    glossSpanA.innerHTML = correctGlossStr;
-
-
-
-    nextSynsetIndexB = null;
-    let decoyPointerPhrase = 'pointer';
-    let decoyWordsStr = 'words';
-    let decoyPosStr = 'pos';
-    let decoyGlossStr = 'gloss';
-    const allDecoyPointers = Object.keys(currentSynsetData[1]);
-    if (allDecoyPointers.length > 0) {
-        nextSynsetIndexB = allDecoyPointers[0];
-        const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
-        decoyPointerPhrase = pointer_key[firstDecoySynPointerSym];
-        decoyWordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
-        decoyPosStr = gameGraph[nextSynsetIndexB][3];
-        decoyGlossStr = gameGraph[nextSynsetIndexB][4];
-    };
-    pointerSpanB.innerHTML = decoyPointerPhrase;
-    wordsSpanB.innerHTML = `${decoyWordsStr} `;
-    posSpanB.innerHTML = decoyPosStr;
-    glossSpanB.innerHTML = decoyGlossStr;
-
-});
+//     pointerIndex = null;
+//     let correctPointerPhrase = 'pointer';
+//     let correctWordsStr = 'words';
+//     let correctPosStr = 'pos';
+//     let correctGlossStr = 'gloss';
+//     const allCorrectPointers = Object.keys(currentSynsetData[0]);
+//     if (allCorrectPointers.length > 0) {
+//         pointerIndex = allCorrectPointers[0];
+//         const firstCorrectSynPointerSym = currentSynsetData[0][pointerIndex];
+//         correctPointerPhrase = pointer_key[firstCorrectSynPointerSym];
+//         correctWordsStr = wordsStrFromArray(gameGraph[pointerIndex][2]);
+//         correctPosStr = gameGraph[pointerIndex][3];
+//         correctGlossStr = gameGraph[pointerIndex][4];
+//     };
+//     pointerSpanA.innerHTML = correctPointerPhrase;
+//     wordsSpanA.innerHTML = `${correctWordsStr} `;
+//     posSpanA.innerHTML = correctPosStr;
+//     glossSpanA.innerHTML = correctGlossStr;
 
 
-const choiceAreaB = document.getElementById('next-syn-b-text');
-choiceAreaB.addEventListener('click', () => {
 
-    const pointerSpanA = document.querySelector('#next-syn-a-text span.pointer');
-    const pointerSpanB = document.querySelector('#next-syn-b-text span.pointer');
-    const wordsSpanA = document.querySelector('#next-syn-a-text span.words');
-    const wordsSpanB = document.querySelector('#next-syn-b-text span.words');
-    const posSpanA = document.querySelector('#next-syn-a-text span.pos');
-    const posSpanB = document.querySelector('#next-syn-b-text span.pos');
-    const glossSpanA = document.querySelector('#next-syn-a-text span.gloss');
-    const glossSpanB = document.querySelector('#next-syn-b-text span.gloss');
+//     nextSynsetIndexB = null;
+//     let decoyPointerPhrase = 'pointer';
+//     let decoyWordsStr = 'words';
+//     let decoyPosStr = 'pos';
+//     let decoyGlossStr = 'gloss';
+//     const allDecoyPointers = Object.keys(currentSynsetData[1]);
+//     if (allDecoyPointers.length > 0) {
+//         nextSynsetIndexB = allDecoyPointers[0];
+//         const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
+//         decoyPointerPhrase = pointer_key[firstDecoySynPointerSym];
+//         decoyWordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
+//         decoyPosStr = gameGraph[nextSynsetIndexB][3];
+//         decoyGlossStr = gameGraph[nextSynsetIndexB][4];
+//     };
+//     pointerSpanB.innerHTML = decoyPointerPhrase;
+//     wordsSpanB.innerHTML = `${decoyWordsStr} `;
+//     posSpanB.innerHTML = decoyPosStr;
+//     glossSpanB.innerHTML = decoyGlossStr;
 
-    currentSynsetIndex = nextSynsetIndexB;
-    const currentSynsetData = gameGraph[currentSynsetIndex];
-    const currSynsetSpan = document.querySelector('#curr-synset span');
-    currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
+// });
 
-    // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
 
-    pointerIndex = Object.keys(currentSynsetData[0])[0];
-    const firstCorrectSynPointerSym = currentSynsetData[0][pointerIndex];
-    pointerSpanA.innerHTML = pointer_key[firstCorrectSynPointerSym];
-    wordsStr = wordsStrFromArray(gameGraph[pointerIndex][2]);
-    wordsSpanA.innerHTML = `${wordsStr} `;
-    posSpanA.innerHTML = gameGraph[pointerIndex][3];
-    glossSpanA.innerHTML = gameGraph[pointerIndex][4];
+// const choiceAreaB = document.getElementById('next-syn-b-text');
+// choiceAreaB.addEventListener('click', () => {
 
-    nextSynsetIndexB = Object.keys(currentSynsetData[1])[0];
-    const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
-    pointerSpanB.innerHTML = pointer_key[firstDecoySynPointerSym];
-    wordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
-    wordsSpanB.innerHTML = `${wordsStr} `;
-    // wordsSpanA.innerHTML = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
-    posSpanB.innerHTML = gameGraph[nextSynsetIndexB][3];
-    glossSpanB.innerHTML = gameGraph[nextSynsetIndexB][4];
+//     const pointerSpanA = document.querySelector('#next-syn-a-text span.pointer');
+//     const pointerSpanB = document.querySelector('#next-syn-b-text span.pointer');
+//     const wordsSpanA = document.querySelector('#next-syn-a-text span.words');
+//     const wordsSpanB = document.querySelector('#next-syn-b-text span.words');
+//     const posSpanA = document.querySelector('#next-syn-a-text span.pos');
+//     const posSpanB = document.querySelector('#next-syn-b-text span.pos');
+//     const glossSpanA = document.querySelector('#next-syn-a-text span.gloss');
+//     const glossSpanB = document.querySelector('#next-syn-b-text span.gloss');
 
-});
+//     currentSynsetIndex = nextSynsetIndexB;
+//     const currentSynsetData = gameGraph[currentSynsetIndex];
+//     const currSynsetSpan = document.querySelector('#curr-synset span');
+//     currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
+
+//     // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
+
+//     pointerIndex = Object.keys(currentSynsetData[0])[0];
+//     const firstCorrectSynPointerSym = currentSynsetData[0][pointerIndex];
+//     pointerSpanA.innerHTML = pointer_key[firstCorrectSynPointerSym];
+//     wordsStr = wordsStrFromArray(gameGraph[pointerIndex][2]);
+//     wordsSpanA.innerHTML = `${wordsStr} `;
+//     posSpanA.innerHTML = gameGraph[pointerIndex][3];
+//     glossSpanA.innerHTML = gameGraph[pointerIndex][4];
+
+//     nextSynsetIndexB = Object.keys(currentSynsetData[1])[0];
+//     const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
+//     pointerSpanB.innerHTML = pointer_key[firstDecoySynPointerSym];
+//     wordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
+//     wordsSpanB.innerHTML = `${wordsStr} `;
+//     // wordsSpanA.innerHTML = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
+//     posSpanB.innerHTML = gameGraph[nextSynsetIndexB][3];
+//     glossSpanB.innerHTML = gameGraph[nextSynsetIndexB][4];
+
+// });
 
 
 
