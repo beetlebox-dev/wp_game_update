@@ -162,19 +162,19 @@
         <div id="next-synsets">
 
             <div id="next-syn-b-text">
-                <span class="pointer">a kind of which is</span>
+                <span class="pointer"></span>
                 <br>
-                <span class="words">condense, concentrate, contract </span><span class="pos">verb</span>
+                <span class="words"></span><span class="pos"></span>
                 <br>
-                <span class="gloss">compress or concentrate; "Congress condensed the three-year plan into a six-month plan"</span>
+                <span class="gloss"></span>
             </div>
 
             <div id="next-syn-a-text">
-                <span class="pointer">which is caused by</span>
+                <span class="pointer"></span>
                 <br>
-                <span class="words">change </span><span class="pos">verb</span>
+                <span class="words"></span><span class="pos"></span>
                 <br>
-                <span class="gloss">undergo a change; become different in essence; losing one's or its original nature; "She changed completely as she grew older"; "The weather changed last night"</span>
+                <span class="gloss"></span>
             </div>
 
         </div>
@@ -188,9 +188,9 @@
     <div id="target">
         <span id="target-heading">TARGET</span>
         <br>
-        <span class="words">compression, condensation, contraction </span><span class="pos">noun</span>&nbsp;&nbsp;
+        <span class="words"></span><span class="pos"></span>&nbsp;&nbsp;
         <br>
-        <span class="gloss">the process or result of becoming smaller or pressed together; "the contraction of a gas on cooling"</span>
+        <span class="gloss"></span>
     </div>
 
 </body>
@@ -198,10 +198,6 @@
 <!-- <script src="{{ url_for('static', filename='wordplay/menu.js') }}"></script> -->
 
 <script>
-
-
-
-
 
 
 const pointer_key = {
@@ -242,55 +238,19 @@ const pointer_key = {
     '>x': 'which can cause',  // custom reflex pointer
 };
 
-
 const gameData = [[[{"2": "~"}, {"3": "~", "4": "~"}, ["trait"], "noun", "a distinguishing feature of your personal nature"], [{}, {}, ["unmindful", "forgetful", "mindless"], "adj", "not mindful or attentive; \"while thus unmindful of his steps he stumbled\"- G.B.Shaw"], [{"5": "~", "6": "~"}, {"7": "+", "8": "~"}, ["attentiveness"], "noun", "the trait of being observant and paying attention"], [{"7": "+"}, {"14": "#p", "15": "="}, ["thoughtfulness"], "noun", "the trait of thinking carefully before acting"], [{"0": "@"}, {"9": "~", "10": "~"}, ["drive"], "noun", "the trait of being highly motivated; \"his drive and energy exhausted his co-workers\""], [{"1": "="}, {}, ["mindfulness", "heedfulness"], "noun", "the trait of staying aware of (paying close attention to) your responsibilities"], [{"1": "+"}, {}, ["unmindfulness", "heedlessness", "inadvertence", "inadvertency"], "noun", "the trait of forgetting or ignoring your responsibilities"], [{"5": "+"}, {"16": "+", "17": "="}, ["heedful", "attentive", "thoughtful", "paying_attention"], "adj", "taking heed; giving close and thoughtful attention; \"heedful of the warnings\"; \"so heedful a writer\"; \"heedful of what they were doing\""], [{"11": "+", "2": "@"}, {"12": "+", "13": "+"}, ["caution", "cautiousness", "carefulness"], "noun", "the trait of being cautious; being attentive to possible danger; \"a man of caution\""], [{}, {}, ["energy", "push", "get-up-and-go"], "noun", "enterprising or ambitious drive; \"Europeans often laugh at American energy\""], [{}, {}, ["action"], "noun", "the trait of being active and energetic and forceful; \"a man of action\""], [{"5": "+"}, {"18": "&", "19": "\\x"}, ["careful", "heedful"], "adj", "cautiously attentive; \"careful of her feelings\"; \"heedful of his father's advice\""], [{}, {}, ["cautious"], "adj", "showing careful forethought; \"reserved and cautious; never making swift decisions\"; \"a cautious driver\""], [{}, {}, ["careful", "thrifty"], "adj", "mindful of the future in spending money; \"careful with money\""], [{}, {}, ["character", "fiber", "fibre"], "noun", "the inherent complex of attributes that determines a persons moral and ethical actions and reactions; \"education has for its object the formation of character\"- Herbert Spencer"], [{}, {}, ["thoughtful"], "adj", "exhibiting or characterized by careful thought; \"a thoughtful paper\""], [{}, {}, ["attend", "hang", "advert", "pay_heed", "give_ear"], "verb", "give heed (to); \"The children in the audience attended the recital quietly\"; \"She hung on his every word\"; \"They attended to everything he said\""], [{}, {}, ["attentiveness", "heed", "regard", "paying_attention"], "noun", "paying particular notice (as to children or helpless people); \"his attentiveness to her wishes\"; \"he spends without heed to the consequences\""], [{}, {}, ["mindful", "aware"], "adj", "bearing in mind; attentive to; \"ever mindful of her health\"; \"mindful of his responsibilities\"; \"mindful of these criticisms, I shall attempt to justify my action\""], [{}, {}, ["mindfully", "heedfully", "advertently"], "adv", "in a careful deliberate manner"]], 0, 1, 2];
 const gameGraph = gameData[0]
 const startSynsetIndex = gameData[1]
 const targetSynsetIndex = gameData[2]
 const totalStrikes = gameData[3]
 
-
-
-// let currentSynsetIndex = startSynsetIndex;
-let currentSynsetIndex
+let currentSynsetIndex;
 let currentStrikes = 0;
 
-
-
-
-function getPointers(synsetIndex) {
-    const pointerObjs = [];
-    const synsetData = gameGraph[synsetIndex];
-    for (const pointerGroup of [0, 1]) {  // Correct is 0, decoy is 1.
-        const allGroupPointerIndices = Object.keys(synsetData[pointerGroup]);
-        if (allGroupPointerIndices.length > 0) {
-            const pointerIndex = allGroupPointerIndices[0];  // Getting first. Should instead be least recent.
-            const pointerSymbol = synsetData[pointerGroup][pointerIndex];
-            const pointerObj = {
-                index: pointerIndex,
-                pointer: pointer_key[pointerSymbol],
-                words: wordsStrFromArray(gameGraph[pointerIndex][2]),
-                pos: gameGraph[pointerIndex][3],
-                gloss: gameGraph[pointerIndex][4],
-            };
-            pointerObjs.push(pointerObj);
-        } else {
-            const pointerObj = { index: null, pointer: 'pointer', words: 'words', pos: 'pos', gloss: 'gloss', };
-            pointerObjs.push(pointerObj);
-        };
-    };
-    return { a: pointerObjs[0], b: pointerObjs[1], };  // Should shuffle returned array so that correct is not always first.
-};
-
-
-
-
+// Create HTML element references and set first pointers within nextSynsObj.
 const startingPointers = getPointers(startSynsetIndex);
-
 const nextSynsObj = {};
 for (const aOrB of ['a', 'b']) {
-
-    // Create HTML element references.
     const areaId = `#next-syn-${aOrB}-text`;
     nextSynsObj[aOrB] = {
         index: startingPointers[aOrB]['index'],
@@ -302,12 +262,11 @@ for (const aOrB of ['a', 'b']) {
     };
 };
 
+
 choose();
 
 
 function choose(aOrB=null) {  // If aOrB is null or not passed, currentSynsetIndex is initialized as the start synset.
-
-    console.log(currentSynsetIndex)
 
     if (aOrB !== null) {
 
@@ -323,15 +282,14 @@ function choose(aOrB=null) {  // If aOrB is null or not passed, currentSynsetInd
 
     } else {  // Init.
         currentSynsetIndex = startSynsetIndex;
-        document.querySelector('#target span.words').innerHTML = wordsStrFromArray(gameGraph[targetSynsetIndex][2]);
+        document.querySelector('#target span.words').innerHTML = `${wordsStrFromArray(gameGraph[targetSynsetIndex][2])} `;
         document.querySelector('#target span.pos').innerHTML = gameGraph[targetSynsetIndex][3];
         document.querySelector('#target span.gloss').innerHTML = gameGraph[targetSynsetIndex][4];
     };
+
     const currSynsetSpan = document.querySelector('#curr-synset span');
     const newCurrentWords = gameGraph[currentSynsetIndex][2];
     currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
-
-    // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
 
     const newPointers = getPointers(currentSynsetIndex);
     for (const newAorB of ['a', 'b']) {
@@ -359,36 +317,8 @@ function choose(aOrB=null) {  // If aOrB is null or not passed, currentSynsetInd
 };
 
 
-for (const aOrB of ['a', 'b']) {
-
+for (const aOrB of ['a', 'b'])
     nextSynsObj[aOrB]['area'].addEventListener('click', () => choose(aOrB));
-
-
-    // nextSynsObj[aOrB]['area'].addEventListener('click', () => {
-
-        // currentSynsetIndex = nextSynsObj[aOrB]['index'];
-        // const currSynsetSpan = document.querySelector('#curr-synset span');
-        // const newCurrentWords = gameGraph[currentSynsetIndex][2];
-        // currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
-
-        // // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
-
-        // const newPointers = getPointers(currentSynsetIndex);
-        // for (const newAorB of ['a', 'b']) {
-        //     nextSynsObj[newAorB]['index'] = newPointers[newAorB]['index'];
-        //     nextSynsObj[newAorB]['pointer'].innerHTML = newPointers[newAorB]['pointer'];
-        //     nextSynsObj[newAorB]['words'].innerHTML = newPointers[newAorB]['words'];
-        //     nextSynsObj[newAorB]['pos'].innerHTML = newPointers[newAorB]['pos'];
-        //     nextSynsObj[newAorB]['gloss'].innerHTML = newPointers[newAorB]['gloss'];
-        // };
-    // });
-};
-
-
-
-
-
-
 
 
 const strikeArea = document.getElementById('strike-area');
@@ -400,131 +330,51 @@ for (let strikeCount = 0; strikeCount < totalStrikes; strikeCount++) {
 };
 
 
+function win() {
+
+    // Add current synset to previous synset list.
+    const prevSynsets = document.getElementById('prev-synsets');
+    const synsetToAdd = document.createElement('div');
+    const wordsArray = gameGraph[currentSynsetIndex][2];
+    synsetToAdd.innerHTML = wordsStrFromArray(wordsArray);
+    synsetToAdd.classList.add('words');
+    prevSynsets.appendChild(synsetToAdd);
+
+    document.getElementById('curr-synset').style.display = 'none';
+    document.getElementById('next-synset-area').style.display = 'none';
+    document.getElementById('target-margin').style.display = 'none';
+
+};
 
 
-// function asdf() {
-
-//     // <div id="strike-area">
-//     //         <div class="strike-box">
-//     //             <img src="/static/red_x.png">
-
-//     // const fragment = document.createDocumentFragment();
-//     // const li = fragment
-//     // .appendChild(document.createElement('section'))
-//     // .appendChild(document.createElement('ul'))
-//     // .appendChild(document.createElement('li'));
-//     // li.textContent = 'hello world';
-//     // document.body.appendChild(fragment);
-
-// };
-
-
-
-// window.addEventListener('keydown', () => {
-//     asdf();
-// });
-
-
-
-
-
-
-
-
-
-// const choiceAreaA = document.getElementById('next-syn-a-text');
-// choiceAreaA.addEventListener('click', () => {
-
-//     currentSynsetIndex = pointerIndex;
-//     const currentSynsetData = gameGraph[currentSynsetIndex];
-//     const currSynsetSpan = document.querySelector('#curr-synset span');
-//     currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
-
-//     // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
-
-//     pointerIndex = null;
-//     let correctPointerPhrase = 'pointer';
-//     let correctWordsStr = 'words';
-//     let correctPosStr = 'pos';
-//     let correctGlossStr = 'gloss';
-//     const allCorrectPointers = Object.keys(currentSynsetData[0]);
-//     if (allCorrectPointers.length > 0) {
-//         pointerIndex = allCorrectPointers[0];
-//         const firstCorrectSynPointerSym = currentSynsetData[0][pointerIndex];
-//         correctPointerPhrase = pointer_key[firstCorrectSynPointerSym];
-//         correctWordsStr = wordsStrFromArray(gameGraph[pointerIndex][2]);
-//         correctPosStr = gameGraph[pointerIndex][3];
-//         correctGlossStr = gameGraph[pointerIndex][4];
-//     };
-//     pointerSpanA.innerHTML = correctPointerPhrase;
-//     wordsSpanA.innerHTML = `${correctWordsStr} `;
-//     posSpanA.innerHTML = correctPosStr;
-//     glossSpanA.innerHTML = correctGlossStr;
-
-
-
-//     nextSynsetIndexB = null;
-//     let decoyPointerPhrase = 'pointer';
-//     let decoyWordsStr = 'words';
-//     let decoyPosStr = 'pos';
-//     let decoyGlossStr = 'gloss';
-//     const allDecoyPointers = Object.keys(currentSynsetData[1]);
-//     if (allDecoyPointers.length > 0) {
-//         nextSynsetIndexB = allDecoyPointers[0];
-//         const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
-//         decoyPointerPhrase = pointer_key[firstDecoySynPointerSym];
-//         decoyWordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
-//         decoyPosStr = gameGraph[nextSynsetIndexB][3];
-//         decoyGlossStr = gameGraph[nextSynsetIndexB][4];
-//     };
-//     pointerSpanB.innerHTML = decoyPointerPhrase;
-//     wordsSpanB.innerHTML = `${decoyWordsStr} `;
-//     posSpanB.innerHTML = decoyPosStr;
-//     glossSpanB.innerHTML = decoyGlossStr;
-
-// });
-
-
-// const choiceAreaB = document.getElementById('next-syn-b-text');
-// choiceAreaB.addEventListener('click', () => {
-
-//     const pointerSpanA = document.querySelector('#next-syn-a-text span.pointer');
-//     const pointerSpanB = document.querySelector('#next-syn-b-text span.pointer');
-//     const wordsSpanA = document.querySelector('#next-syn-a-text span.words');
-//     const wordsSpanB = document.querySelector('#next-syn-b-text span.words');
-//     const posSpanA = document.querySelector('#next-syn-a-text span.pos');
-//     const posSpanB = document.querySelector('#next-syn-b-text span.pos');
-//     const glossSpanA = document.querySelector('#next-syn-a-text span.gloss');
-//     const glossSpanB = document.querySelector('#next-syn-b-text span.gloss');
-
-//     currentSynsetIndex = nextSynsetIndexB;
-//     const currentSynsetData = gameGraph[currentSynsetIndex];
-//     const currSynsetSpan = document.querySelector('#curr-synset span');
-//     currSynsetSpan.innerHTML = wordsStrFromArray(currentSynsetData[2]);
-
-//     // TODO: !@#$!@#$!@#$ Just grabbing first of decoy/correct! Not jumbling correct/decoy!
-
-//     pointerIndex = Object.keys(currentSynsetData[0])[0];
-//     const firstCorrectSynPointerSym = currentSynsetData[0][pointerIndex];
-//     pointerSpanA.innerHTML = pointer_key[firstCorrectSynPointerSym];
-//     wordsStr = wordsStrFromArray(gameGraph[pointerIndex][2]);
-//     wordsSpanA.innerHTML = `${wordsStr} `;
-//     posSpanA.innerHTML = gameGraph[pointerIndex][3];
-//     glossSpanA.innerHTML = gameGraph[pointerIndex][4];
-
-//     nextSynsetIndexB = Object.keys(currentSynsetData[1])[0];
-//     const firstDecoySynPointerSym = currentSynsetData[1][nextSynsetIndexB];
-//     pointerSpanB.innerHTML = pointer_key[firstDecoySynPointerSym];
-//     wordsStr = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
-//     wordsSpanB.innerHTML = `${wordsStr} `;
-//     // wordsSpanA.innerHTML = wordsStrFromArray(gameGraph[nextSynsetIndexB][2]);
-//     posSpanB.innerHTML = gameGraph[nextSynsetIndexB][3];
-//     glossSpanB.innerHTML = gameGraph[nextSynsetIndexB][4];
-
-// });
-
-
-
+function getPointers(synsetIndex) {
+    const pointerObjs = [];
+    const synsetData = gameGraph[synsetIndex];
+    for (const pointerGroup of [0, 1]) {  // Correct is 0, decoy is 1.
+        const allGroupPointerIndices = Object.keys(synsetData[pointerGroup]);
+        if (allGroupPointerIndices.length > 0) {
+            const pointerIndex = allGroupPointerIndices[0];  // Getting first. Should instead be least recent.
+            const pointerSymbol = synsetData[pointerGroup][pointerIndex];
+            const pointerObj = {
+                index: pointerIndex,
+                pointer: pointer_key[pointerSymbol],
+                words: wordsStrFromArray(gameGraph[pointerIndex][2]),
+                pos: gameGraph[pointerIndex][3],
+                gloss: gameGraph[pointerIndex][4],
+            };
+            pointerObjs.push(pointerObj);
+        } else {
+            alert('Dead end!');
+            win();
+            return null;
+            // const pointerObj = { index: null, pointer: 'pointer', words: 'words', pos: 'pos', gloss: 'gloss', };
+            // pointerObjs.push(pointerObj);
+        };
+    };
+    // !@#$!@#$ Debug random 0.5
+    if (Math.random() < 1) return { a: pointerObjs[0], b: pointerObjs[1], };
+    else return { a: pointerObjs[1], b: pointerObjs[0], };
+};
 
 
 function wordsStrFromArray(wordsArray) {
@@ -535,6 +385,7 @@ function wordsStrFromArray(wordsArray) {
     };
     return synsetWordString;
 };
+
 
 </script>
 

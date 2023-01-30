@@ -9,6 +9,9 @@ with open('wordnet-data-0.pkl', 'rb') as file:
     wordnet_data = pickle.load(file)
 
 
+# todo: rule out antonym connections, even if an antonym isn't the pointer used.
+# todo: word list string?
+
 # todo: Make synsets_by_depth a tuple.
 
 
