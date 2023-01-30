@@ -244,83 +244,28 @@ const startSynsetIndex = gameData[1]
 const targetSynsetIndex = gameData[2]
 const totalStrikes = gameData[3]
 
-let currentSynsetIndex;
+
+
+
+let currentSynsetIndex = startSynsetIndex;
 let currentStrikes = 0;
 
-// Create HTML element references and set first pointers within nextSynsObj.
-const startingPointers = getPointers(startSynsetIndex);
+// Create HTML element references within nextSynsObj.
 const nextSynsObj = {};
 for (const aOrB of ['a', 'b']) {
-    const areaId = `#next-syn-${aOrB}-text`;
+    const areaSelector = `#next-syn-${aOrB}-text`;
     nextSynsObj[aOrB] = {
-        index: startingPointers[aOrB]['index'],
-        area: document.querySelector(areaId),
-        pointer: document.querySelector(`${areaId} span.pointer`),
-        words: document.querySelector(`${areaId} span.words`),
-        pos: document.querySelector(`${areaId} span.pos`),
-        gloss: document.querySelector(`${areaId} span.gloss`),
+        index: null,  // ?????????????????????????????????????????????????????
+        direction: null,  // 0 is correct, 1 is decoy.
+        area: document.querySelector(areaSelector),
+        pointer: document.querySelector(`${areaSelector} span.pointer`),
+        words: document.querySelector(`${areaSelector} span.words`),
+        pos: document.querySelector(`${areaSelector} span.pos`),
+        gloss: document.querySelector(`${areaSelector} span.gloss`),
     };
 };
 
-
-choose();
-
-
-function choose(aOrB=null) {  // If aOrB is null or not passed, currentSynsetIndex is initialized as the start synset.
-
-    if (aOrB !== null) {
-
-        // Add current synset to previous synset list.
-        const prevSynsets = document.getElementById('prev-synsets');
-        const synsetToAdd = document.createElement('div');
-        const wordsArray = gameGraph[currentSynsetIndex][2];
-        synsetToAdd.innerHTML = wordsStrFromArray(wordsArray);
-        synsetToAdd.classList.add('words');
-        prevSynsets.appendChild(synsetToAdd);
-
-        currentSynsetIndex = nextSynsObj[aOrB]['index'];
-
-    } else {  // Init.
-        currentSynsetIndex = startSynsetIndex;
-        document.querySelector('#target span.words').innerHTML = `${wordsStrFromArray(gameGraph[targetSynsetIndex][2])} `;
-        document.querySelector('#target span.pos').innerHTML = gameGraph[targetSynsetIndex][3];
-        document.querySelector('#target span.gloss').innerHTML = gameGraph[targetSynsetIndex][4];
-    };
-
-    const currSynsetSpan = document.querySelector('#curr-synset span');
-    const newCurrentWords = gameGraph[currentSynsetIndex][2];
-    currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
-
-    const newPointers = getPointers(currentSynsetIndex);
-    for (const newAorB of ['a', 'b']) {
-        nextSynsObj[newAorB]['index'] = newPointers[newAorB]['index'];
-        nextSynsObj[newAorB]['pointer'].innerHTML = newPointers[newAorB]['pointer'];
-        nextSynsObj[newAorB]['words'].innerHTML = `${newPointers[newAorB]['words']} `;
-        nextSynsObj[newAorB]['pos'].innerHTML = newPointers[newAorB]['pos'];
-        nextSynsObj[newAorB]['gloss'].innerHTML = newPointers[newAorB]['gloss'];
-    };
-
-    // Add arrow.
-    const arrowArea = document.getElementById('arrow-area');
-    const newArrow = document.createElement('img');
-    newArrow.src = '/static/arrow_outline.png';
-    arrowArea.appendChild(newArrow);
-
-    if (aOrB === 'b') {
-        // Add strike.
-        currentStrikes += 1;
-        const strikeBox = document.getElementById(`strike-box-${currentStrikes}`)
-        const newX = document.createElement('img');
-        newX.src = '/static/red_x.png';
-        strikeBox.appendChild(newX);
-    };
-};
-
-
-for (const aOrB of ['a', 'b'])
-    nextSynsObj[aOrB]['area'].addEventListener('click', () => choose(aOrB));
-
-
+// Add empty strike boxes.
 const strikeArea = document.getElementById('strike-area');
 for (let strikeCount = 0; strikeCount < totalStrikes; strikeCount++) {
     const newStrikeBox = document.createElement('div');
@@ -328,61 +273,183 @@ for (let strikeCount = 0; strikeCount < totalStrikes; strikeCount++) {
     newStrikeBox.classList.add('strike-box');
     strikeArea.appendChild(newStrikeBox);
 };
+        
+// Init target.
+document.querySelector('#target span.words').innerHTML = wordsStrFromArray(gameGraph[targetSynsetIndex][2], true);
+document.querySelector('#target span.pos').innerHTML = gameGraph[targetSynsetIndex][3];
+document.querySelector('#target span.gloss').innerHTML = gameGraph[targetSynsetIndex][4];
+
+// Create event listeners.
+for (const aOrB of ['a', 'b'])
+    nextSynsObj[aOrB]['area'].addEventListener('click', () => choose(aOrB));
+
+choose();
 
 
-function win() {
 
-    // Add current synset to previous synset list.
+
+function addSynToPrevList(synsetIndex) {
     const prevSynsets = document.getElementById('prev-synsets');
     const synsetToAdd = document.createElement('div');
-    const wordsArray = gameGraph[currentSynsetIndex][2];
+    const wordsArray = gameGraph[synsetIndex][2];
     synsetToAdd.innerHTML = wordsStrFromArray(wordsArray);
     synsetToAdd.classList.add('words');
     prevSynsets.appendChild(synsetToAdd);
-
-    document.getElementById('curr-synset').style.display = 'none';
-    document.getElementById('next-synset-area').style.display = 'none';
-    document.getElementById('target-margin').style.display = 'none';
-
 };
 
+function choose(aOrB=null) {  // To init at game start, run choose(null).
 
-function getPointers(synsetIndex) {
-    const pointerObjs = [];
-    const synsetData = gameGraph[synsetIndex];
-    for (const pointerGroup of [0, 1]) {  // Correct is 0, decoy is 1.
-        const allGroupPointerIndices = Object.keys(synsetData[pointerGroup]);
-        if (allGroupPointerIndices.length > 0) {
-            const pointerIndex = allGroupPointerIndices[0];  // Getting first. Should instead be least recent.
-            const pointerSymbol = synsetData[pointerGroup][pointerIndex];
-            const pointerObj = {
-                index: pointerIndex,
-                pointer: pointer_key[pointerSymbol],
-                words: wordsStrFromArray(gameGraph[pointerIndex][2]),
-                pos: gameGraph[pointerIndex][3],
-                gloss: gameGraph[pointerIndex][4],
+    // Add arrow.
+    const arrowArea = document.getElementById('arrow-area');
+    const newArrow = document.createElement('img');
+    newArrow.src = '/static/arrow_outline.png';
+    arrowArea.appendChild(newArrow);
+
+    if (aOrB !== null) {
+
+        addSynToPrevList(currentSynsetIndex);
+        currentSynsetIndex = nextSynsObj[aOrB]['index'];  // Update currentSynsetIndex to chosen.
+
+        if (nextSynsObj[aOrB]['direction'] === 1) {
+            // Add strike.
+            currentStrikes += 1;
+            const strikeBox = document.getElementById(`strike-box-${currentStrikes}`)
+            const newX = document.createElement('img');
+            newX.src = '/static/red_x.png';
+            strikeBox.appendChild(newX);
+            if (currentStrikes >= totalStrikes) {
+                lose();
+                return;
             };
-            pointerObjs.push(pointerObj);
-        } else {
-            alert('Dead end!');
-            win();
-            return null;
-            // const pointerObj = { index: null, pointer: 'pointer', words: 'words', pos: 'pos', gloss: 'gloss', };
-            // pointerObjs.push(pointerObj);
         };
     };
-    // !@#$!@#$ Debug random 0.5
-    if (Math.random() < 1) return { a: pointerObjs[0], b: pointerObjs[1], };
-    else return { a: pointerObjs[1], b: pointerObjs[0], };
+
+    // Update pointers.
+    //
+
+    const currentSynsetData = gameGraph[currentSynsetIndex];
+
+    let pointerLetterNames = ['a', 'b'];
+    if (Math.random() < 0) pointerLetterNames = ['b', 'a'];  // !@#$!@#$ Debug random 0.5
+    
+    let pointerDataIndex = 0;  // Correct is at 0, decoy is at 1.
+    for (const aOrB of pointerLetterNames) {
+
+        const allGroupPointerIndices = Object.keys(currentSynsetData[pointerDataIndex]);
+
+        if (allGroupPointerIndices.includes(String(targetSynsetIndex))) {
+            win();
+            return;
+
+        } else if (allGroupPointerIndices.length > 0) {
+            const pointerIndex = allGroupPointerIndices[0];  // Getting first. Should instead be least recent.
+            const pointerSymbol = currentSynsetData[pointerDataIndex][pointerIndex];
+            nextSynsObj[aOrB]['index'] = pointerIndex;
+            nextSynsObj[aOrB]['direction'] = pointerDataIndex;
+            nextSynsObj[aOrB]['pointer'].innerHTML = pointer_key[pointerSymbol];
+            nextSynsObj[aOrB]['words'].innerHTML = wordsStrFromArray(gameGraph[pointerIndex][2], true);
+            nextSynsObj[aOrB]['pos'].innerHTML = gameGraph[pointerIndex][3];
+            nextSynsObj[aOrB]['gloss'].innerHTML = gameGraph[pointerIndex][4];
+
+        } else {
+            // Should not happen. Synsets should always have at least 1 correct and decoy pointer unless target or strike limit is reached.
+            console.log('should not happen')
+            lose();
+            return;
+        };
+
+        pointerDataIndex = 1;
+    };
+
+    // End update pointers.
+    //
+
+    // Update current synset element if not returned above.
+    const currSynsetSpan = document.querySelector('#curr-synset span.words');
+    const newCurrentWords = gameGraph[currentSynsetIndex][2];
+    currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
+
+    // if (aOrB === 'b') {
+    //     // Add strike.
+    //     currentStrikes += 1;
+    //     const strikeBox = document.getElementById(`strike-box-${currentStrikes}`)
+    //     const newX = document.createElement('img');
+    //     newX.src = '/static/red_x.png';
+    //     strikeBox.appendChild(newX);
+    //     if (currentStrikes >= totalStrikes) {
+    //         lose();
+    //         return;
+    //     };
+    // };
 };
 
 
-function wordsStrFromArray(wordsArray) {
+function lose() {
+    addSynToPrevList(currentSynsetIndex);
+    for (const elemId of ['curr-synset', 'next-synset-area', 'target-margin'])
+        document.getElementById(elemId).style.display = 'none';
+    alert('Lose!');
+};
+function win() {
+    addSynToPrevList(currentSynsetIndex);
+    for (const elemId of ['curr-synset', 'next-synset-area', 'target-margin'])
+        document.getElementById(elemId).style.display = 'none';
+    alert('Win!');
+};
+
+
+// function changePointers(synsetIndex) {
+
+    // const pointerObjs = [];
+    // const synsetData = gameGraph[synsetIndex];
+
+    // let pointerLetterNames = ['a', 'b'];
+    // if (Math.random() < 0) pointerLetterNames = ['b', 'a'];  // !@#$!@#$ Debug random 0.5
+    
+    // let pointerDataIndex = 0;  // Correct is at 0, decoy is at 1.
+    // for (const aOrB of pointerLetterNames) {
+    //     const allGroupPointerIndices = Object.keys(synsetData[pointerDataIndex]);
+
+
+    //     if (allGroupPointerIndices.includes(targetSynsetIndex)) {
+    //         win();
+    //         return;
+    //     };
+
+    //     if (allGroupPointerIndices.length > 0) {
+    //         const pointerIndex = allGroupPointerIndices[0];  // Getting first. Should instead be least recent.
+    //         const pointerSymbol = synsetData[pointerDataIndex][pointerIndex];
+    //         nextSynsObj[aOrB]['index'] = pointerIndex;
+    //         nextSynsObj[aOrB]['pointer'].innerHTML = pointer_key[pointerSymbol];
+    //         nextSynsObj[aOrB]['words'].innerHTML = wordsStrFromArray(gameGraph[pointerIndex][2], true);
+    //         nextSynsObj[aOrB]['pos'].innerHTML = gameGraph[pointerIndex][3];
+    //         nextSynsObj[aOrB]['gloss'].innerHTML = gameGraph[pointerIndex][4];
+
+    //     } else {
+    //         lose();
+    //         return;
+    //     };
+    //     pointerDataIndex = 1;
+    // };
+
+    // // Update current synset element if not returned above.
+    // const currSynsetSpan = document.querySelector('#curr-synset span.words');
+    // const newCurrentWords = gameGraph[currentSynsetIndex][2];
+    // currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
+
+    // // Is new one away from target?
+    // // Are strikes full?
+    // // No pointer choice (should not happen)?
+// };
+
+
+function wordsStrFromArray(wordsArray, addEndingSpace=false) {
     let synsetWordString = '';
     for (let wordNum = 0; wordNum < wordsArray.length; wordNum++) {
         if (wordNum > 0) synsetWordString += ', ';
         synsetWordString += wordsArray[wordNum];
     };
+    if (addEndingSpace) synsetWordString += ' ';
     return synsetWordString;
 };
 
