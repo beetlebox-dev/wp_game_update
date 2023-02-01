@@ -19,6 +19,20 @@
             background-color: black;
         }
 
+        #win-heading, #win-stats {
+            color: hsl(102, 100%, 50%);
+        }
+        #lose-heading {
+            color: hsl(0, 100%, 50%);
+        }
+        #lose-heading, #win-heading, #win-stats {
+            display: none;
+        }
+        #win-stats {
+            font-weight: normal;
+            font-size: small;
+        }
+
         /* Game Stats Bar */
         #stats-bar {
             justify-content: space-between;
@@ -126,7 +140,7 @@
         #target {
             box-sizing: border-box;
             padding: 3vw;
-            background-color: hsl(0, 0%, 10%);
+            background-color: hsla(0, 0%, 100%, 10%);
             color: hsl(0, 0%, 100%);
         }
 
@@ -152,6 +166,12 @@
         </div>
 
     </div>
+
+    <h1 id='lose-heading'>LOSE</h1>
+    <h1 id='win-heading'
+        >WIN<br>
+        <span id='win-stats'></span>
+    </h1>
 
     <div id="prev-synsets">
         <!-- <div class="words">apple, air potato</div> -->
@@ -246,16 +266,20 @@ const pointer_key = {
 };
 
 const gameData = [[[{"2": "~"}, {"3": "~", "4": "~"}, ["trait"], "noun", "a distinguishing feature of your personal nature"], [{}, {}, ["unmindful", "forgetful", "mindless"], "adj", "not mindful or attentive; \"while thus unmindful of his steps he stumbled\"- G.B.Shaw"], [{"5": "~", "6": "~"}, {"7": "+", "8": "~"}, ["attentiveness"], "noun", "the trait of being observant and paying attention"], [{"7": "+"}, {"14": "#p", "15": "="}, ["thoughtfulness"], "noun", "the trait of thinking carefully before acting"], [{"0": "@"}, {"9": "~", "10": "~"}, ["drive"], "noun", "the trait of being highly motivated; \"his drive and energy exhausted his co-workers\""], [{"1": "="}, {}, ["mindfulness", "heedfulness"], "noun", "the trait of staying aware of (paying close attention to) your responsibilities"], [{"1": "+"}, {}, ["unmindfulness", "heedlessness", "inadvertence", "inadvertency"], "noun", "the trait of forgetting or ignoring your responsibilities"], [{"5": "+"}, {"16": "+", "17": "="}, ["heedful", "attentive", "thoughtful", "paying_attention"], "adj", "taking heed; giving close and thoughtful attention; \"heedful of the warnings\"; \"so heedful a writer\"; \"heedful of what they were doing\""], [{"11": "+", "2": "@"}, {"12": "+", "13": "+"}, ["caution", "cautiousness", "carefulness"], "noun", "the trait of being cautious; being attentive to possible danger; \"a man of caution\""], [{}, {}, ["energy", "push", "get-up-and-go"], "noun", "enterprising or ambitious drive; \"Europeans often laugh at American energy\""], [{}, {}, ["action"], "noun", "the trait of being active and energetic and forceful; \"a man of action\""], [{"5": "+"}, {"18": "&", "19": "\\x"}, ["careful", "heedful"], "adj", "cautiously attentive; \"careful of her feelings\"; \"heedful of his father's advice\""], [{}, {}, ["cautious"], "adj", "showing careful forethought; \"reserved and cautious; never making swift decisions\"; \"a cautious driver\""], [{}, {}, ["careful", "thrifty"], "adj", "mindful of the future in spending money; \"careful with money\""], [{}, {}, ["character", "fiber", "fibre"], "noun", "the inherent complex of attributes that determines a persons moral and ethical actions and reactions; \"education has for its object the formation of character\"- Herbert Spencer"], [{}, {}, ["thoughtful"], "adj", "exhibiting or characterized by careful thought; \"a thoughtful paper\""], [{}, {}, ["attend", "hang", "advert", "pay_heed", "give_ear"], "verb", "give heed (to); \"The children in the audience attended the recital quietly\"; \"She hung on his every word\"; \"They attended to everything he said\""], [{}, {}, ["attentiveness", "heed", "regard", "paying_attention"], "noun", "paying particular notice (as to children or helpless people); \"his attentiveness to her wishes\"; \"he spends without heed to the consequences\""], [{}, {}, ["mindful", "aware"], "adj", "bearing in mind; attentive to; \"ever mindful of her health\"; \"mindful of his responsibilities\"; \"mindful of these criticisms, I shall attempt to justify my action\""], [{}, {}, ["mindfully", "heedfully", "advertently"], "adv", "in a careful deliberate manner"]], 0, 1, 2];
-const gameGraph = gameData[0]
-const startSynsetIndex = gameData[1]
-const targetSynsetIndex = gameData[2]
-const totalStrikes = gameData[3]
+const gameGraph = gameData[0];
+const startSynsetIndex = gameData[1];
+const targetSynsetIndex = gameData[2];
+const totalStrikes = gameData[3];
+
+
+const textFxTimeoutIds = {};
 
 
 
 
 let currentSynsetIndex = startSynsetIndex;
 let currentStrikes = 0;
+let currentSteps = 0;
 
 // Create HTML element references within nextSynsObj.
 const nextSynsObj = {};
@@ -265,10 +289,10 @@ for (const aOrB of ['a', 'b']) {
         index: null,  // ?????????????????????????????????????????????????????
         direction: null,  // 0 is correct, 1 is decoy.
         area: document.querySelector(areaSelector),
-        pointer: document.querySelector(`${areaSelector} span.pointer`),
-        words: document.querySelector(`${areaSelector} span.words`),
-        pos: document.querySelector(`${areaSelector} span.pos`),
-        gloss: document.querySelector(`${areaSelector} span.gloss`),
+        // pointer: document.querySelector(`${areaSelector} span.pointer`),
+        // words: document.querySelector(`${areaSelector} span.words`),
+        // pos: document.querySelector(`${areaSelector} span.pos`),
+        // gloss: document.querySelector(`${areaSelector} span.gloss`),
     };
 };
 
@@ -306,14 +330,16 @@ function addSynToPrevList(synsetIndex) {
 
 function choose(aOrB=null) {  // To init at game start, run choose(null).
 
+    currentSteps++;
+
     // Add arrow.
     const arrowArea = document.getElementById('arrow-area');
     const newArrow = document.createElement('img');
     newArrow.src = '/static/arrow_outline.png';
     arrowArea.appendChild(newArrow);
-    newArrow.style.height = '0';  // working here !@#!@#$!@#$
-    newArrow.style.transition = 'height 2s';
-    newArrow.style.height = '2em';  // Match CSS.
+    // newArrow.style.height = '0';  // working here !@#!@#$!@#$
+    // newArrow.style.transition = 'height 2s';
+    // newArrow.style.height = '2em';  // Match CSS.
 
     if (aOrB !== null) {
 
@@ -363,10 +389,20 @@ function choose(aOrB=null) {  // To init at game start, run choose(null).
             nextSynsObj[aOrB]['index'] = pointerIndex;
             nextSynsObj[aOrB]['direction'] = pointerDataIndex;
 
-            textChangeEffect(nextSynsObj[aOrB]['pointer'], pointerPhrase);
-            textChangeEffect(nextSynsObj[aOrB]['words'], wordsStrFromArray(gameGraph[pointerIndex][2], true) + ` ${correctOrDecoy}`);  // debug !@#$!@#$
-            textChangeEffect(nextSynsObj[aOrB]['pos'], gameGraph[pointerIndex][3]);
-            textChangeEffect(nextSynsObj[aOrB]['gloss'], gameGraph[pointerIndex][4]);
+
+
+            // pointer: document.querySelector(`${areaSelector} span.pointer`),
+            // words: document.querySelector(`${areaSelector} span.words`),
+            // pos: document.querySelector(`${areaSelector} span.pos`),
+            // gloss: document.querySelector(`${areaSelector} span.gloss`),
+
+            const areaSelector = `#next-syn-${aOrB}-text span.`;
+
+
+            textChangeEffect(`${areaSelector}pointer`, pointerPhrase);
+            textChangeEffect(`${areaSelector}words`, wordsStrFromArray(gameGraph[pointerIndex][2], true) + ` ${correctOrDecoy}`);  // debug !@#$!@#$
+            textChangeEffect(`${areaSelector}pos`, gameGraph[pointerIndex][3]);
+            textChangeEffect(`${areaSelector}gloss`, gameGraph[pointerIndex][4]);
             // nextSynsObj[aOrB]['pointer'].innerHTML = pointerPhrase;
             // nextSynsObj[aOrB]['words'].innerHTML = wordsStrFromArray(gameGraph[pointerIndex][2], true) + ` ${correctOrDecoy}`;  // debug !@#$!@#$
             // nextSynsObj[aOrB]['pos'].innerHTML = gameGraph[pointerIndex][3];
@@ -386,23 +422,29 @@ function choose(aOrB=null) {  // To init at game start, run choose(null).
     //
 
     // Update current synset element if not returned above.
-    // const currSynsetSpan = document.querySelector('#curr-synset span.words');
     const newCurrentWords = gameGraph[currentSynsetIndex][2];
     const currSynsetElem = document.querySelector('#curr-synset span.words');
     currSynsetElem.innerHTML = '';
-    textChangeEffect(currSynsetElem, wordsStrFromArray(newCurrentWords));
-    // currSynsetSpan.innerHTML = wordsStrFromArray(newCurrentWords);
+    // textChangeEffect(currSynsetElem, wordsStrFromArray(newCurrentWords));
+    currSynsetElem.innerHTML = wordsStrFromArray(newCurrentWords);
 };
 
 
 function lose() {
+    document.body.style.backgroundColor = 'hsl(0, 100%, 5%)';
+    document.getElementById('lose-heading').style.display = 'block';
+    document.getElementById('target-margin').style.borderColor = 'red';
     addSynToPrevList(currentSynsetIndex);
-    for (const elemId of ['curr-synset', 'next-synset-area', 'target-margin'])
+    for (const elemId of ['curr-synset', 'next-synset-area'])
         document.getElementById(elemId).style.display = 'none';
 };
 
 
 function win(finalPointerPhrase) {
+    document.body.style.backgroundColor = 'hsl(102, 100%, 5%)';
+    document.getElementById('win-heading').style.display = 'block';
+    document.getElementById('win-stats').style.display = 'block';
+    document.getElementById('win-stats').innerHTML = `in ${currentSteps} steps`;
     addSynToPrevList(currentSynsetIndex);
     for (const elemId of ['curr-synset', 'next-synset-area', 'target-margin'])
         document.getElementById(elemId).style.display = 'none';
@@ -423,8 +465,13 @@ function wordsStrFromArray(wordsArray, addEndingSpace=false) {
 };
 
 
-function textChangeEffect(elem, newText, charMsecs=10) {
-    // const elem = document.querySelector(cssSelector);
+function textChangeEffect(cssSelector, newText, charMsecs=10) {
+
+    if (cssSelector in textFxTimeoutIds) {
+        clearTimeout(textFxTimeoutIds[cssSelector]);
+    };
+
+    const elem = document.querySelector(cssSelector);
     const oldText = elem.innerText;
 
     const loopLength = Math.max(oldText.length, newText.length);
@@ -444,7 +491,8 @@ function textChangeEffect(elem, newText, charMsecs=10) {
             index++;
             if (index <= loopLength) {
                 // console.log(`index ${index}`)
-                setTimeout(timeoutFunc, charMsecs);
+                const timeoutId = setTimeout(timeoutFunc, charMsecs);
+                textFxTimeoutIds[cssSelector] = timeoutId;
             };
         };
 
@@ -461,7 +509,8 @@ function textChangeEffect(elem, newText, charMsecs=10) {
             elem.innerText = transitionText;
             index--;
             if (index >= 0) {
-                setTimeout(timeoutFunc, charMsecs);
+                const timeoutId = setTimeout(timeoutFunc, charMsecs);
+                textFxTimeoutIds[cssSelector] = timeoutId;
             };
         };
     };
