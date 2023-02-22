@@ -26,7 +26,7 @@ target_synset_num = curated_game_data[2]
 
 
 export_data = curated_game_data
-export_data.append(start_hp)
+export_data.append(start_hp)  # WHAT IS NEEDED FOR EXPORT!
 with open(f"game1.json", "w") as file:
     json.dump(export_data, file)
 
