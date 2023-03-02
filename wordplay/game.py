@@ -2,6 +2,9 @@ import random
 import statistics
 
 
+# todo Wordnet data for synset 107948 has antonym listed at beginning and end!
+
+
 POINTER_TYPES_TO_IGNORE = {';u', '-u', '<', '<x', '!', '?p'}
 # usage domains/members, adjective/verb derivations, antonyms, word pivots
 
@@ -59,7 +62,12 @@ def get_synset_with_most_pointers(wordnet_data, synset_set, samples=10):
             exception_str = f'Error choosing random synset from synset_set in get_synset_with_most_pointers().\n' \
                             f'synset_set: {synset_set}\n{e}'
             raise Exception(exception_str)
-        pointer_count = len(wordnet_data[rand_synset][4])
+        pointer_count = 0
+        all_out_pointers = wordnet_data[rand_synset][4]
+        for out_pointer in all_out_pointers:
+            if out_pointer[0] not in POINTER_TYPES_TO_IGNORE:
+                pointer_count += 1
+        # pointer_count = len(wordnet_data[rand_synset][4])
         if pointer_count > highest_pointer_count:
             best_synset_id = rand_synset
             highest_pointer_count = pointer_count
@@ -167,7 +175,9 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
                     if pointer_group[rank_index]['rank_value'] is None \
                             or pointer_group[rank_index]['rank_value'] < child_rank_value:
                         child_pointer_data = \
-                            {'id': child_pointer_id, 'rank_value': child_rank_value, 'symbol': child_pointer_symbol}
+                            {'id': child_pointer_id, 'rank_value': child_rank_value,
+                             'data': (child_pointer_symbol, child_pointer[2], child_pointer[3])}
+                            # {'id': child_pointer_id, 'rank_value': child_rank_value, 'symbol': child_pointer_symbol}  #todo !@#$!@#$!@#$
                         pointer_group.insert(rank_index, child_pointer_data)
                         del pointer_group[2]
                         break
@@ -179,7 +189,8 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
                 for pointer in best_pointers[pointer_category]:
                     if pointer['rank_value'] is not None:
                         child_synset_id = pointer['id']
-                        game_graph[parent_synset_id][pointer_category][child_synset_id] = pointer['symbol']
+                        game_graph[parent_synset_id][pointer_category][child_synset_id] = pointer['data']  #todo !@#$!@#$!@#$
+                        # game_graph[parent_synset_id][pointer_category][child_synset_id] = pointer['symbol']  #todo !@#$!@#$!@#$
                         if child_synset_id not in game_graph:
                             game_graph[child_synset_id] = {
                                 'pointers_gathered': False, 'correct': {}, 'decoy': {},
@@ -225,13 +236,19 @@ def prune_and_reindex_game_data(game_graph, synsets_by_depth, dead_ends, start_s
             pointers = game_graph[wordnet_index][pointer_category]
             for pointer_wordnet_index in pointers:
                 pointer_new_index = new_index_by_wordnet_index[pointer_wordnet_index]
-                pointer_symbol = pointers[pointer_wordnet_index]
-                pointers_reindexed[pointer_category][pointer_new_index] = pointer_symbol
+                # pointer_symbol = pointers[pointer_wordnet_index]  #todo!@#$!@#$!@#$
+                # pointers_reindexed[pointer_category][pointer_new_index] = pointer_symbol
+                pointer_data = pointers[pointer_wordnet_index]
+                pointers_reindexed[pointer_category][pointer_new_index] = pointer_data
+
+        # cleaned_string = extra_spaces_removed_string.replace(' ', '_')
+        word_list_underscores_to_spaces = [word.replace('_', ' ') for word in game_graph[wordnet_index]['words']]
         revised_node = [
             pointers_reindexed['correct'],
             pointers_reindexed['decoy'],
             # todo: Don't need to store words/pos/gloss in game_graph before now.
-            list(game_graph[wordnet_index]['words']),
+            word_list_underscores_to_spaces,
+            # list(game_graph[wordnet_index]['words']),
             game_graph[wordnet_index]['pos'],
             game_graph[wordnet_index]['gloss'],
         ]
@@ -269,10 +286,15 @@ def rand_synset_max_in_pointers(wordnet_data, samples=10):
     best_pointer_count = -1
     for _ in range(samples):
         rand_synset_id = random_main_group_synset(wordnet_data)
-        pointer_count = len(wordnet_data[rand_synset_id][5])  # Number of IN-pointers.
-        if pointer_count > best_pointer_count:
+        all_in_pointers = wordnet_data[rand_synset_id][5]
+        in_pointer_count = 0
+        for in_pointer in all_in_pointers:
+            if in_pointer[0] not in POINTER_TYPES_TO_IGNORE:
+                in_pointer_count += 1
+        # pointer_count = len(wordnet_data[rand_synset_id][5])  # Number of IN-pointers.
+        if in_pointer_count > best_pointer_count:
             best_synset_id = rand_synset_id
-            best_pointer_count = pointer_count
+            best_pointer_count = in_pointer_count
     return best_synset_id
 
 
@@ -291,6 +313,15 @@ def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
         # Generate random game_graph.
         target_synset_id = rand_synset_max_in_pointers(wordnet_data)
         synsets_by_depth_wn_index = get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth)
+        if len(synsets_by_depth_wn_index) != analysis_depth + 1:
+            # The randomly selected target_synset_id could lead to a dead end, which is handled by this block.
+            print('*****************************')
+            print(wordnet_data[target_synset_id])
+            print(target_synset_id)
+            print(synsets_by_depth_wn_index)
+            print(start_depth)
+            print(analysis_depth)
+            continue
         start_synset_id = get_synset_with_most_pointers(wordnet_data, synsets_by_depth_wn_index[start_depth])
         get_game_graph_result = get_game_graph(wordnet_data, synsets_by_depth_wn_index, start_synset_id, start_hp)
         game_graph = get_game_graph_result[0]

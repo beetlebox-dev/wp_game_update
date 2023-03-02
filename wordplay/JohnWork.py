@@ -3,7 +3,7 @@ import json
 from wordplay.manage_database import POINTER_SYMBOL_KEY
 from wordplay.game import POINTER_TYPES_TO_IGNORE
 from game import get_depth, curate_game_data
-
+import time
 
 with open('wordnet-data-0.pkl', 'rb') as file:
     wordnet_data = pickle.load(file)
@@ -25,9 +25,12 @@ start_synset_num = curated_game_data[1]
 target_synset_num = curated_game_data[2]
 
 
-export_data = curated_game_data
+game_name = int(time.time())
+# game_name = '2023-03-01'
+export_data = list(curated_game_data)
 export_data.append(start_hp)  # WHAT IS NEEDED FOR EXPORT!
-with open(f"game1.json", "w") as file:
+print(export_data)
+with open(f"{game_name}.json", "w") as file:
     json.dump(export_data, file)
 
 
@@ -128,91 +131,94 @@ def print_synset_info(synset_num, prefix=''):
 # print_synset_info(target_synset_num, synsets_by_depth, deepest_depth, 'TARGET: | ')
 # print('')
 
-current_synset_num = start_synset_num
-
-visit_order = {}
-visit_number = 0
-
-while True:
-
-    visit_number += 1
-
-    visit_order[current_synset_num] = visit_number
-
-    # # First item is the pointer, and the second is the number of connections.
-    # decoy_synsets = [[None, -1], [None, -1], [None, -1]]  # [lateral, ==1_away, >1_away]
-    # toward_synset = [None, -1]
-
-    # current_synset_depth = get_depth(current_synset_num, synsets_by_depth)
 
 
-    print_synset_info(current_synset_num, 'CURRENT: | ')
 
-    print('')
-    print_synset_info(target_synset_num, 'TARGET: | ')
-    print_synset_info(current_synset_num, 'CURRENT: | ')
-    print('')
-
-    # correct_pointers = game_tree[current_synset_num]['correct']
-    # decoy_pointers = game_tree[current_synset_num]['decoy']
-
-
-    for pointers_group in [0, 1]:  # 0 is index for correct pointers, and 1 is index for decoy pointers.
-        ptr_grp = game_tree[current_synset_num][pointers_group]
-
-        oldest_order = 99999  # todo use infinity?
-        chosen_pointer_id = None
-
-        for pointer_id in ptr_grp:
-            if pointer_id not in visit_order:
-                this_order = -1
-            else:
-                this_order = visit_order[pointer_id]
-            if this_order < oldest_order:
-                # For ties, the first pointer listed wins, and is ordered to be favorable.
-                oldest_order = this_order
-                chosen_pointer_id = pointer_id
-
-        if chosen_pointer_id is None:
-            pointer_type = ['correct', 'decoy'][pointers_group]
-            print(f'No {pointer_type} pointers!')
-        else:
-            print(f'Visit number: {visit_number} | Oldest order: {oldest_order} | Chosen id: {chosen_pointer_id}')
-            pointer_symbol = ptr_grp[chosen_pointer_id]
-            # pointer = ptr_grp[chosen_pointer_id]
-            # pointer_symbol = pointer['symbol']
-            prefix = f'    {pointers_group}: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
-            print_synset_info(chosen_pointer_id, prefix)
-
-        for option_pointer_id in ptr_grp:
-            pointer_symbol = ptr_grp[option_pointer_id]
-            # pointer = ptr_grp[option_pointer_id]
-            # pointer_symbol = pointer['symbol']
-            prefix = f'    {pointers_group}opt: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
-            print_synset_info(option_pointer_id, prefix)
-
-    print('')
-
-    # print_synset_info(toward_synset[0][1], f'    CORRECT: {POINTER_SYMBOL_KEY[toward_synset[0][0]]["phrase"]} | ')
-    # decoy_synset = None
-    # for decoy_level in decoy_synsets:
-    #     if decoy_level[0] is not None:
-    #         decoy_synset = decoy_level[0][1]
-    #         print_synset_info(decoy_synset, f'    DECOY: {POINTER_SYMBOL_KEY[decoy_level[0][0]]["phrase"]} | ')
-    #         break
-
-    user_response = input('    Which synset next? ')
-    print('')
-
-    current_synset_num = int(user_response)
-
-    # if user_response == 'a':
-    #     current_synset_num = toward_synset[0][1]
-    # elif user_response == 'b':
-    #     current_synset_num = decoy_synset[1]
-    # else:
-    #     next_pointer_index = int(user_response) - 1
-    #     current_synset_num = wordnet_data[current_synset_num][4][next_pointer_index][1]
+# current_synset_num = start_synset_num
+#
+# visit_order = {}
+# visit_number = 0
+#
+# while True:
+#
+#     visit_number += 1
+#
+#     visit_order[current_synset_num] = visit_number
+#
+#     # # First item is the pointer, and the second is the number of connections.
+#     # decoy_synsets = [[None, -1], [None, -1], [None, -1]]  # [lateral, ==1_away, >1_away]
+#     # toward_synset = [None, -1]
+#
+#     # current_synset_depth = get_depth(current_synset_num, synsets_by_depth)
+#
+#
+#     print_synset_info(current_synset_num, 'CURRENT: | ')
+#
+#     print('')
+#     print_synset_info(target_synset_num, 'TARGET: | ')
+#     print_synset_info(current_synset_num, 'CURRENT: | ')
+#     print('')
+#
+#     # correct_pointers = game_tree[current_synset_num]['correct']
+#     # decoy_pointers = game_tree[current_synset_num]['decoy']
+#
+#
+#     for pointers_group in [0, 1]:  # 0 is index for correct pointers, and 1 is index for decoy pointers.
+#         ptr_grp = game_tree[current_synset_num][pointers_group]
+#
+#         oldest_order = 99999  # todo use infinity?
+#         chosen_pointer_id = None
+#
+#         for pointer_id in ptr_grp:
+#             if pointer_id not in visit_order:
+#                 this_order = -1
+#             else:
+#                 this_order = visit_order[pointer_id]
+#             if this_order < oldest_order:
+#                 # For ties, the first pointer listed wins, and is ordered to be favorable.
+#                 oldest_order = this_order
+#                 chosen_pointer_id = pointer_id
+#
+#         if chosen_pointer_id is None:
+#             pointer_type = ['correct', 'decoy'][pointers_group]
+#             print(f'No {pointer_type} pointers!')
+#         else:
+#             print(f'Visit number: {visit_number} | Oldest order: {oldest_order} | Chosen id: {chosen_pointer_id}')
+#             pointer_symbol = ptr_grp[chosen_pointer_id][0]
+#             # pointer = ptr_grp[chosen_pointer_id]
+#             # pointer_symbol = pointer['symbol']
+#             prefix = f'    {pointers_group}: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
+#             print_synset_info(chosen_pointer_id, prefix)
+#
+#         for option_pointer_id in ptr_grp:
+#             pointer_symbol = ptr_grp[option_pointer_id][0]
+#             # pointer = ptr_grp[option_pointer_id]
+#             # pointer_symbol = pointer['symbol']
+#             prefix = f'    {pointers_group}opt: {POINTER_SYMBOL_KEY[pointer_symbol]["phrase"]} | '
+#             print_synset_info(option_pointer_id, prefix)
+#
+#     print('')
+#
+#     # print_synset_info(toward_synset[0][1], f'    CORRECT: {POINTER_SYMBOL_KEY[toward_synset[0][0]]["phrase"]} | ')
+#     # decoy_synset = None
+#     # for decoy_level in decoy_synsets:
+#     #     if decoy_level[0] is not None:
+#     #         decoy_synset = decoy_level[0][1]
+#     #         print_synset_info(decoy_synset, f'    DECOY: {POINTER_SYMBOL_KEY[decoy_level[0][0]]["phrase"]} | ')
+#     #         break
+#
+#     user_response = input('    Which synset next? ')
+#     print('')
+#
+#     current_synset_num = int(user_response)
+#
+#     # if user_response == 'a':
+#     #     current_synset_num = toward_synset[0][1]
+#     # elif user_response == 'b':
+#     #     current_synset_num = decoy_synset[1]
+#     # else:
+#     #     next_pointer_index = int(user_response) - 1
+#     #     current_synset_num = wordnet_data[current_synset_num][4][next_pointer_index][1]
 
 
 
