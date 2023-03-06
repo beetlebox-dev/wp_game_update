@@ -3,8 +3,8 @@ import time
 from google.cloud import storage  # pip install --upgrade google-cloud-storage
 
 
-BUCKET_NAME = 'webapps-362719_cloudbuild'
-SUB_PATH = 'site-data/'
+BUCKET_NAME = 'app-storage-bucket'
+SUB_PATH = 'wp-game/'  # Each subfolder ends with /  # Start with nothing.
 
 
 class Serve:
@@ -176,7 +176,7 @@ Otherwise, a dictionary is returned from json files, or a list of lines as strin
 
     def upload(self, file_path, new_contents):
         blob = self.get_blob(file_path)
-        if isinstance(new_contents, dict):
+        if isinstance(new_contents, dict) or isinstance(new_contents, list):
             contents_str = json.dumps(new_contents, indent=4)
         else:
             contents_str = str(new_contents)

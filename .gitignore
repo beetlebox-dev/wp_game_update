@@ -3,4 +3,4 @@
 __pycache__/
 venv/
 
-site-data/
+app-storage-bucket/

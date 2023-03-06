@@ -22,16 +22,13 @@ class Blob:
 
 class Bucket:
 
-    # Nothing is done with the init variable foo.
-    def __init__(self, foo):
-        pass
+    def __init__(self, bucket_name):
+        self.bucket_name = bucket_name
 
     def blob(self, file_path):
-        return Blob(file_path)
+        return Blob(f'{self.bucket_name}/{file_path}')
 
 
 class Client:
-
-    # Nothing is done with the init variable foo.
-    def bucket(self, foo):
-        return Bucket(foo)
+    def bucket(self, bucket_name):
+        return Bucket(bucket_name)

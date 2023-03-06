@@ -6,4 +6,4 @@
 __pycache__/
 venv/
 google/
-site-data/
+app-storage-bucket/
