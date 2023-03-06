@@ -3,6 +3,10 @@ import time
 from google.cloud import storage  # pip install --upgrade google-cloud-storage
 
 
+BUCKET_NAME = 'webapps-362719_cloudbuild'
+SUB_PATH = 'site-data/'
+
+
 class Serve:
 
     def __init__(self):
@@ -11,13 +15,13 @@ class Serve:
 
     def get_bucket(self):
         storage_client = storage.Client()
-        self.bucket = storage_client.bucket('maskedcatco_cloudbuild')
+        self.bucket = storage_client.bucket(BUCKET_NAME)
 
     def get_blob(self, file_path):
         if file_path not in self.blobs:
             if self.bucket is None:
                 self.get_bucket()
-            blob = self.bucket.blob(f'site-data/{file_path}')
+            blob = self.bucket.blob(f'{SUB_PATH}{file_path}')
             self.blobs[file_path] = blob
         return self.blobs[file_path]
 

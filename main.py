@@ -2,12 +2,26 @@
 # import pickle
 # import json
 # import statistics
-# from admin import admin_alert_thread
+# import sys
+from admin import admin_alert_thread
 from server_retrieval import Serve
 
 
-serve = Serve()
-serve.upload('wp-game/current_game.json', 'Test contents.')
+if __name__ == "__main__":
+
+    try:
+        serve = Serve()
+        serve.upload('wp-game/current_game.json', 'Test contents.')
+    except Exception as e:
+        print(e)
+        print('Failed to upload to cloud storage.')
+        # sys.exit(1)  # Exit this job attempt.
+
+    try:
+        admin_alert_thread('Wordplay Game - Update Job', 'Admin alert test successful.')
+    except Exception as e:
+        print(e)
+        print('Failed to run admin_alert_thread.')
 
 
 #
