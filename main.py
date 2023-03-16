@@ -1,6 +1,7 @@
 import random
 import pickle
 import statistics
+import sys
 from admin import admin_alert_thread
 from server_retrieval import Serve
 
@@ -400,6 +401,18 @@ if __name__ == "__main__":
     try:
 
         serve = Serve()
+
+        try:
+            serve.delete('game_downloaded')
+        except Exception as e:
+            alert_message = f'wp-game-update job\n' \
+                            f'Error thrown while trying to delete file "game_downloaded".\n' \
+                            f'New game not created.\n' \
+                            f'Error: {e}'
+            print(alert_message)
+            admin_alert_thread('Web App - Log', alert_message)
+            sys.exit(1)  # Exiting the process.
+
         curated_game_data = curate_game_data(WORDNET_DATA, START_DEPTH, START_HP)
         export_data = list(curated_game_data)
         export_data.append(START_HP)
