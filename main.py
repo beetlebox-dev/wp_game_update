@@ -22,7 +22,7 @@ with open('wordnet-data-0.pkl', 'rb') as file:
     WORDNET_DATA = pickle.load(file)
 
 
-def get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth):
+def get_synsets_by_depth(target_synset_id, analysis_depth):
     visited_synsets = {target_synset_id}
     synsets_by_depth = [{target_synset_id}]
     current_generation = [('__start', target_synset_id, 0, 0)]
@@ -36,7 +36,7 @@ def get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth):
 
             parent_synset_id = parent_pointer[1]
 
-            for child_pointer in wordnet_data[parent_synset_id][5]:  # "In" pointers TO parent_synset_id.
+            for child_pointer in WORDNET_DATA[parent_synset_id][5]:  # "In" pointers TO parent_synset_id.
 
                 child_pointer_symbol = child_pointer[0]
 
@@ -60,7 +60,35 @@ def get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth):
     return synsets_by_depth
 
 
-def get_synset_with_most_pointers(wordnet_data, synset_set, samples=10):
+def get_rand_commonly_used_synset_id():
+
+    with open('wordnet-index.pkl', 'rb') as file:
+        wn_index = pickle.load(file)
+    with open("parse_word_list/word_set.pkl", "rb") as file:
+        word_set = list(pickle.load(file))
+
+    while True:
+        rand_word = random.choice(word_set)
+        if rand_word in wn_index:
+            candidate_synset_ids = wn_index[rand_word]
+            break
+
+    best_synset_id = None
+    highest_pointer_count = -1
+    for rand_synset in candidate_synset_ids:
+        pointer_count = 0
+        all_out_pointers = WORDNET_DATA[rand_synset][4]
+        for out_pointer in all_out_pointers:
+            if out_pointer[0] not in POINTER_TYPES_TO_IGNORE:
+                pointer_count += 1
+        if pointer_count > highest_pointer_count:
+            best_synset_id = rand_synset
+            highest_pointer_count = pointer_count
+
+    return best_synset_id
+
+
+def get_synset_with_most_pointers(synset_set, samples=10):
     """Samples is the number of random synsets from synset_set to check before returning the best found."""
     best_synset_id = None
     highest_pointer_count = -1
@@ -73,11 +101,10 @@ def get_synset_with_most_pointers(wordnet_data, synset_set, samples=10):
                             f'synset_set: {synset_set}\n{e}'
             raise Exception(exception_str)
         pointer_count = 0
-        all_out_pointers = wordnet_data[rand_synset][4]
+        all_out_pointers = WORDNET_DATA[rand_synset][4]
         for out_pointer in all_out_pointers:
             if out_pointer[0] not in POINTER_TYPES_TO_IGNORE:
                 pointer_count += 1
-        # pointer_count = len(wordnet_data[rand_synset][4])
         if pointer_count > highest_pointer_count:
             best_synset_id = rand_synset
             highest_pointer_count = pointer_count
@@ -93,19 +120,19 @@ def get_depth(synset_id, synsets_by_depth):
     return synset_depth
 
 
-def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
+def get_game_graph(synsets_by_depth, start_synset_id, start_hp):
 
     target_synset_id = list(synsets_by_depth[0])[0]
     # The only synset contained at depth 0 in synsets_by_depth.
 
     game_graph = {
         start_synset_id: {
-            'pointers_gathered': False, 'correct': {}, 'decoy': {}, 'words': wordnet_data[start_synset_id][3],
-            'pos': wordnet_data[start_synset_id][1], 'gloss': wordnet_data[start_synset_id][2],
+            'pointers_gathered': False, 'correct': {}, 'decoy': {}, 'words': WORDNET_DATA[start_synset_id][3],
+            'pos': WORDNET_DATA[start_synset_id][1], 'gloss': WORDNET_DATA[start_synset_id][2],
         },
         target_synset_id: {
-            'pointers_gathered': True, 'correct': {}, 'decoy': {}, 'words': wordnet_data[target_synset_id][3],
-            'pos': wordnet_data[target_synset_id][1], 'gloss': wordnet_data[target_synset_id][2],
+            'pointers_gathered': True, 'correct': {}, 'decoy': {}, 'words': WORDNET_DATA[target_synset_id][3],
+            'pos': WORDNET_DATA[target_synset_id][1], 'gloss': WORDNET_DATA[target_synset_id][2],
             # Correct and decoy pointers will not be used at target and will remain empty.
             # todo: Error thrown if correct/decoy keys aren't present???
         },
@@ -146,7 +173,7 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
             }  # When actual pointers are added, other keys besides 'rank_value' are 'id' and 'symbol'.
 
             # Loop through all WordNet pointers, storing only the two with the highest rank_value.
-            for child_pointer in wordnet_data[parent_synset_id][4]:  # "Out" pointers FROM parent_synset_id.
+            for child_pointer in WORDNET_DATA[parent_synset_id][4]:  # "Out" pointers FROM parent_synset_id.
 
                 child_pointer_symbol = child_pointer[0]
 
@@ -159,7 +186,7 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
                 #    A depth change of +1 means getting 1-degree CLOSER to the target, or a distance DECREASE of 1.
 
                 # Init rank_value with depth_change and pointer_count.
-                pointer_count = len(wordnet_data[child_pointer_id][4])
+                pointer_count = len(WORDNET_DATA[child_pointer_id][4])
                 child_rank_value = (depth_change + 1) * 1000 + pointer_count
                 # Depth_change is normalized to the range 0-2 (initially -1 to +1).
 
@@ -204,8 +231,8 @@ def get_game_graph(wordnet_data, synsets_by_depth, start_synset_id, start_hp):
                         if child_synset_id not in game_graph:
                             game_graph[child_synset_id] = {
                                 'pointers_gathered': False, 'correct': {}, 'decoy': {},
-                                'words': wordnet_data[child_synset_id][3], 'pos': wordnet_data[child_synset_id][1],
-                                'gloss': wordnet_data[child_synset_id][2],
+                                'words': WORDNET_DATA[child_synset_id][3], 'pos': WORDNET_DATA[child_synset_id][1],
+                                'gloss': WORDNET_DATA[child_synset_id][2],
                             }
                             if pointer_category == 'correct':
                                 next_correct_pointers_missing_in_graph.add(child_synset_id)
@@ -284,31 +311,30 @@ def prune_and_reindex_game_data(game_graph, synsets_by_depth, dead_ends, start_s
     return game_graph_reindexed, nodes_by_depth_pruned_and_reindexed, start_node_reindexed, dead_ends_reindexed
 
 
-def random_main_group_synset(wordnet_data):
+def random_main_group_synset():
     while True:
-        rand_synset_id = random.randint(0, len(wordnet_data))
-        if wordnet_data[rand_synset_id][0] == -1:
+        rand_synset_id = random.randint(0, len(WORDNET_DATA))
+        if WORDNET_DATA[rand_synset_id][0] == -1:
             return rand_synset_id
 
 
-def rand_synset_max_in_pointers(wordnet_data, samples=10):
+def rand_synset_max_in_pointers(samples=10):
     best_synset_id = None
     best_pointer_count = -1
     for _ in range(samples):
-        rand_synset_id = random_main_group_synset(wordnet_data)
-        all_in_pointers = wordnet_data[rand_synset_id][5]
+        rand_synset_id = random_main_group_synset()
+        all_in_pointers = WORDNET_DATA[rand_synset_id][5]
         in_pointer_count = 0
         for in_pointer in all_in_pointers:
             if in_pointer[0] not in POINTER_TYPES_TO_IGNORE:
                 in_pointer_count += 1
-        # pointer_count = len(wordnet_data[rand_synset_id][5])  # Number of IN-pointers.
         if in_pointer_count > best_pointer_count:
             best_synset_id = rand_synset_id
             best_pointer_count = in_pointer_count
     return best_synset_id
 
 
-def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
+def curate_game_data(start_depth, start_hp, samples=10):
 
     analysis_depth = start_depth + start_hp - 1
     curated_game_graph = None
@@ -321,19 +347,20 @@ def curate_game_data(wordnet_data, start_depth, start_hp, samples=10):
     for _ in range(samples):
 
         # Generate random game_graph.
-        target_synset_id = rand_synset_max_in_pointers(wordnet_data)
-        synsets_by_depth_wn_index = get_synsets_by_depth(wordnet_data, target_synset_id, analysis_depth)
+        target_synset_id = get_rand_commonly_used_synset_id()
+        # target_synset_id = rand_synset_max_in_pointers()
+        synsets_by_depth_wn_index = get_synsets_by_depth(target_synset_id, analysis_depth)
         if len(synsets_by_depth_wn_index) != analysis_depth + 1:
             # The randomly selected target_synset_id could lead to a dead end, which is handled by this block.
             print('*****************************')
-            print(wordnet_data[target_synset_id])
+            print(WORDNET_DATA[target_synset_id])
             print(target_synset_id)
             print(synsets_by_depth_wn_index)
             print(start_depth)
             print(analysis_depth)
             continue
-        start_synset_id = get_synset_with_most_pointers(wordnet_data, synsets_by_depth_wn_index[start_depth])
-        get_game_graph_result = get_game_graph(wordnet_data, synsets_by_depth_wn_index, start_synset_id, start_hp)
+        start_synset_id = get_synset_with_most_pointers(synsets_by_depth_wn_index[start_depth])
+        get_game_graph_result = get_game_graph(synsets_by_depth_wn_index, start_synset_id, start_hp)
         game_graph = get_game_graph_result[0]
         dead_ends_wn_indices = get_game_graph_result[1]
         prune_and_reindex_game_data_result = \
@@ -413,7 +440,7 @@ if __name__ == "__main__":
             admin_alert_thread('Web App - Log', alert_message)
             sys.exit(1)  # Exiting the process.
 
-        curated_game_data = curate_game_data(WORDNET_DATA, START_DEPTH, START_HP)
+        curated_game_data = curate_game_data(START_DEPTH, START_HP)
         export_data = list(curated_game_data)
         export_data.append(START_HP)
         serve.upload(GAME_NAME, export_data)
