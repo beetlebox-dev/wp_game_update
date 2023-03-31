@@ -2,5 +2,6 @@
 .idea/
 __pycache__/
 venv/
+cloud_job_tutorial.py
 
 app-storage-bucket/

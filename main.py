@@ -12,8 +12,8 @@ from server_retrieval import Serve
 # todo Wordnet data for synset 107948 has antonym listed at beginning and end!
 # todo: Can add words/pos/gloss at prune phase and discard all previous instances in game_graph.
 
-START_DEPTH = 5  # > 1 | DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
-START_HP = 3  # > 0 | Gameplay continues until hp is 0.
+START_DEPTH = 3  #5 > 1 | DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
+START_HP = 2  #3 > 0 | Gameplay continues until hp is 0.
 GAME_NAME = 'current_game.json'
 POINTER_TYPES_TO_IGNORE = {';u', '-u', '<', '<x', '!', '?p'}
 #    usage domains/members, adjective/verb derivations, antonyms, word pivots
@@ -340,6 +340,7 @@ def curate_game_data(start_depth, start_hp, samples=10):
     curated_game_graph = None
     curated_start_node_index = None
     curated_target_node_index = None
+    curated_nodes_by_depth = None  # todo debug only!
 
     lowest_nodes_decoy_count_index = 9999  # Primary factor in choosing game_graph.
     lowest_depth_node_counts_sdev = 9999  # Breaks ties of lowest_non_double_decoy_nodes_index.
@@ -419,8 +420,9 @@ def curate_game_data(start_depth, start_hp, samples=10):
             curated_target_node_index = list(nodes_by_depth[0])[0]  # Only node at depth 0.
             lowest_nodes_decoy_count_index = nodes_decoy_count_index
             lowest_depth_node_counts_sdev = depth_node_counts_sdev_in_mean_units
+            curated_nodes_by_depth = nodes_by_depth  # todo debug only!
 
-    return curated_game_graph, curated_start_node_index, curated_target_node_index
+    return curated_game_graph, curated_start_node_index, curated_target_node_index, curated_nodes_by_depth  # todo nodes_by_depth debug only!
 
 
 if __name__ == "__main__":
@@ -429,30 +431,32 @@ if __name__ == "__main__":
 
         serve = Serve()
 
-        try:
-            serve.delete('game_downloaded')
-        except Exception as e:
-            alert_message = f'wp-game-update job\n' \
-                            f'Error thrown while trying to delete file "game_downloaded".\n' \
-                            f'New game not created.\n' \
-                            f'Error: {e}'
-            print(alert_message)
-            admin_alert_thread('Web App - Log', alert_message)
-            sys.exit(1)  # Exiting the process.
+        # try:
+        #     serve.delete('game_downloaded')
+        # except Exception as e:
+        #     alert_message = f'wp-game-update job\n' \
+        #                     f'Error thrown while trying to delete file "game_downloaded".\n' \
+        #                     f'New game not created.\n' \
+        #                     f'Error: {e}'
+        #     print(alert_message)
+        #     admin_alert_thread('Web App - Log', alert_message)
+        #     sys.exit(1)  # Exiting the process.
 
         curated_game_data = curate_game_data(START_DEPTH, START_HP)
-        export_data = list(curated_game_data)
+        export_data = list(curated_game_data[:3])
         export_data.append(START_HP)
         serve.upload(GAME_NAME, export_data)
 
         game_graph = export_data[0]
         start_node_index = export_data[1]
         target_node_index = export_data[2]
+        nodes_by_depth = curated_game_data[3]  # todo debug only
         alert_message = f'New wordplay game generated.\n' \
                         f'Start word: {game_graph[start_node_index][2][0]}\n' \
                         f'Target word: {game_graph[target_node_index][2][0]}\n' \
                         f'Synset count: {len(game_graph)}'
         print(alert_message)
+        print(f'nodes_by_depth: {nodes_by_depth}')
         admin_alert_thread('Web App - Log', alert_message)
 
     except Exception as e:

@@ -1,5 +1,6 @@
 .gitignore
 .git
+cloud_job_tutorial.py
 
 .DS_Store
 .idea/
