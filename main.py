@@ -2,21 +2,40 @@ import random
 import pickle
 import statistics
 import sys
+import traceback
+from inspect import currentframe, getframeinfo
 from admin import admin_alert_thread
 from server_retrieval import Serve
 
 
-# todo: rule out antonym connections, even if an antonym isn't the pointer used.
-# todo: word list string?
-# todo: Make synsets_by_depth a tuple.
-# todo Wordnet data for synset 107948 has antonym listed at beginning and end!
-# todo: Can add words/pos/gloss at prune phase and discard all previous instances in game_graph.
-
-START_DEPTH = 3  #5 > 1 | DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
-START_HP = 2  #3 > 0 | Gameplay continues until hp is 0.
+START_DEPTH = 5  # > 1 | DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
+START_HP = 3  # > 0 | Gameplay continues until hp is 0.
 GAME_NAME = 'current_game.json'
 POINTER_TYPES_TO_IGNORE = {';u', '-u', '<', '<x', '!', '?p'}
 #    usage domains/members, adjective/verb derivations, antonyms, word pivots
+
+
+# testdict = {'a': 1, 'b': 2}
+# try:
+#     x = testdict['c']
+# except Exception as e:
+#     stack_str = traceback.format_exc()
+#     print(f'stack: {stack_str}')
+
+    # stacklist = traceback.format_stack()
+
+    # # Newer Python Version.
+    # exc = sys.exception()
+    # excform = traceback.format_exception(exc)
+
+    # exc_info = sys.exc_info()
+    # excform = traceback.format_exception(None, exc_info, exc_info)
+
+    # print(f'stacklist: {stacklist}')
+    # print(f'excform: {excform}')
+    # print(f'Exception: {e}')
+# sys.exit()
+
 
 with open('wordnet-data-0.pkl', 'rb') as file:
     WORDNET_DATA = pickle.load(file)
@@ -62,10 +81,10 @@ def get_synsets_by_depth(target_synset_id, analysis_depth):
 
 def get_rand_commonly_used_synset_id():
 
-    with open('wordnet-index.pkl', 'rb') as file:
-        wn_index = pickle.load(file)
-    with open("parse_word_list/word_set.pkl", "rb") as file:
-        word_set = list(pickle.load(file))
+    with open('wordnet-index.pkl', 'rb') as index_file:
+        wn_index = pickle.load(index_file)
+    with open("parse_word_list/word_set.pkl", "rb") as words_file:
+        word_set = list(pickle.load(words_file))
 
     while True:
         rand_word = random.choice(word_set)
@@ -95,10 +114,10 @@ def get_synset_with_most_pointers(synset_set, samples=10):
     for _ in range(samples):
         try:
             rand_synset = random.choice(list(synset_set))
-        except Exception as e:
-            # todo: Debugging.
+        except Exception as exc:
+            stack_str = traceback.format_exc()
             exception_str = f'Error choosing random synset from synset_set in get_synset_with_most_pointers().\n' \
-                            f'synset_set: {synset_set}\n{e}'
+                            f'synset_set: {synset_set}\n{exc}\n{stack_str}'
             raise Exception(exception_str)
         pointer_count = 0
         all_out_pointers = WORDNET_DATA[rand_synset][4]
@@ -134,7 +153,6 @@ def get_game_graph(synsets_by_depth, start_synset_id, start_hp):
             'pointers_gathered': True, 'correct': {}, 'decoy': {}, 'words': WORDNET_DATA[target_synset_id][3],
             'pos': WORDNET_DATA[target_synset_id][1], 'gloss': WORDNET_DATA[target_synset_id][2],
             # Correct and decoy pointers will not be used at target and will remain empty.
-            # todo: Error thrown if correct/decoy keys aren't present???
         },
     }
 
@@ -164,7 +182,7 @@ def get_game_graph(synsets_by_depth, start_synset_id, start_hp):
             # One_way and in_tree represent booleans where False is 0 and True is 1.
             # Depth_change is normalized to the range 0-2 (initially -1 to +1).
             # Pointer_count is the number of total WordNet pointers.
-            # Parentheses contain possible variable ranges (inclusive).
+            # Parentheses contain possible variable ranges (both inclusive).
 
             parent_depth = get_depth(parent_synset_id, synsets_by_depth)
             best_pointers = {
@@ -214,7 +232,6 @@ def get_game_graph(synsets_by_depth, start_synset_id, start_hp):
                         child_pointer_data = \
                             {'id': child_pointer_id, 'rank_value': child_rank_value,
                              'data': (child_pointer_symbol, child_pointer[2], child_pointer[3])}
-                            # {'id': child_pointer_id, 'rank_value': child_rank_value, 'symbol': child_pointer_symbol}  #todo !@#$!@#$!@#$
                         pointer_group.insert(rank_index, child_pointer_data)
                         del pointer_group[2]
                         break
@@ -226,8 +243,7 @@ def get_game_graph(synsets_by_depth, start_synset_id, start_hp):
                 for pointer in best_pointers[pointer_category]:
                     if pointer['rank_value'] is not None:
                         child_synset_id = pointer['id']
-                        game_graph[parent_synset_id][pointer_category][child_synset_id] = pointer['data']  #todo !@#$!@#$!@#$
-                        # game_graph[parent_synset_id][pointer_category][child_synset_id] = pointer['symbol']  #todo !@#$!@#$!@#$
+                        game_graph[parent_synset_id][pointer_category][child_synset_id] = pointer['data']
                         if child_synset_id not in game_graph:
                             game_graph[child_synset_id] = {
                                 'pointers_gathered': False, 'correct': {}, 'decoy': {},
@@ -273,19 +289,14 @@ def prune_and_reindex_game_data(game_graph, synsets_by_depth, dead_ends, start_s
             pointers = game_graph[wordnet_index][pointer_category]
             for pointer_wordnet_index in pointers:
                 pointer_new_index = new_index_by_wordnet_index[pointer_wordnet_index]
-                # pointer_symbol = pointers[pointer_wordnet_index]  #todo!@#$!@#$!@#$
-                # pointers_reindexed[pointer_category][pointer_new_index] = pointer_symbol
                 pointer_data = pointers[pointer_wordnet_index]
                 pointers_reindexed[pointer_category][pointer_new_index] = pointer_data
 
-        # cleaned_string = extra_spaces_removed_string.replace(' ', '_')
         word_list_underscores_to_spaces = [word.replace('_', ' ') for word in game_graph[wordnet_index]['words']]
         revised_node = [
             pointers_reindexed['correct'],
             pointers_reindexed['decoy'],
-            # todo: Don't need to store words/pos/gloss in game_graph before now.
             word_list_underscores_to_spaces,
-            # list(game_graph[wordnet_index]['words']),
             game_graph[wordnet_index]['pos'],
             game_graph[wordnet_index]['gloss'],
         ]
@@ -318,20 +329,20 @@ def random_main_group_synset():
             return rand_synset_id
 
 
-def rand_synset_max_in_pointers(samples=10):
-    best_synset_id = None
-    best_pointer_count = -1
-    for _ in range(samples):
-        rand_synset_id = random_main_group_synset()
-        all_in_pointers = WORDNET_DATA[rand_synset_id][5]
-        in_pointer_count = 0
-        for in_pointer in all_in_pointers:
-            if in_pointer[0] not in POINTER_TYPES_TO_IGNORE:
-                in_pointer_count += 1
-        if in_pointer_count > best_pointer_count:
-            best_synset_id = rand_synset_id
-            best_pointer_count = in_pointer_count
-    return best_synset_id
+# def rand_synset_max_in_pointers(samples=10):
+#     best_synset_id = None
+#     best_pointer_count = -1
+#     for _ in range(samples):
+#         rand_synset_id = random_main_group_synset()
+#         all_in_pointers = WORDNET_DATA[rand_synset_id][5]
+#         in_pointer_count = 0
+#         for in_pointer in all_in_pointers:
+#             if in_pointer[0] not in POINTER_TYPES_TO_IGNORE:
+#                 in_pointer_count += 1
+#         if in_pointer_count > best_pointer_count:
+#             best_synset_id = rand_synset_id
+#             best_pointer_count = in_pointer_count
+#     return best_synset_id
 
 
 def curate_game_data(start_depth, start_hp, samples=10):
@@ -340,7 +351,6 @@ def curate_game_data(start_depth, start_hp, samples=10):
     curated_game_graph = None
     curated_start_node_index = None
     curated_target_node_index = None
-    curated_nodes_by_depth = None  # todo debug only!
 
     lowest_nodes_decoy_count_index = 9999  # Primary factor in choosing game_graph.
     lowest_depth_node_counts_sdev = 9999  # Breaks ties of lowest_non_double_decoy_nodes_index.
@@ -349,16 +359,18 @@ def curate_game_data(start_depth, start_hp, samples=10):
 
         # Generate random game_graph.
         target_synset_id = get_rand_commonly_used_synset_id()
-        # target_synset_id = rand_synset_max_in_pointers()
         synsets_by_depth_wn_index = get_synsets_by_depth(target_synset_id, analysis_depth)
         if len(synsets_by_depth_wn_index) != analysis_depth + 1:
-            # The randomly selected target_synset_id could lead to a dead end, which is handled by this block.
             print('*****************************')
+            frameinfo = getframeinfo(currentframe())
+            print(f'file: {frameinfo.filename} | line: {frameinfo.lineno}')
+            print('The randomly selected target_synset_id could lead to a dead end, which is handled by this block.')
             print(WORDNET_DATA[target_synset_id])
             print(target_synset_id)
             print(synsets_by_depth_wn_index)
             print(start_depth)
             print(analysis_depth)
+            print('*****************************')
             continue
         start_synset_id = get_synset_with_most_pointers(synsets_by_depth_wn_index[start_depth])
         get_game_graph_result = get_game_graph(synsets_by_depth_wn_index, start_synset_id, start_hp)
@@ -420,9 +432,8 @@ def curate_game_data(start_depth, start_hp, samples=10):
             curated_target_node_index = list(nodes_by_depth[0])[0]  # Only node at depth 0.
             lowest_nodes_decoy_count_index = nodes_decoy_count_index
             lowest_depth_node_counts_sdev = depth_node_counts_sdev_in_mean_units
-            curated_nodes_by_depth = nodes_by_depth  # todo debug only!
 
-    return curated_game_graph, curated_start_node_index, curated_target_node_index, curated_nodes_by_depth  # todo nodes_by_depth debug only!
+    return curated_game_graph, curated_start_node_index, curated_target_node_index
 
 
 if __name__ == "__main__":
@@ -431,34 +442,37 @@ if __name__ == "__main__":
 
         serve = Serve()
 
-        # try:
-        #     serve.delete('game_downloaded')
-        # except Exception as e:
-        #     alert_message = f'wp-game-update job\n' \
-        #                     f'Error thrown while trying to delete file "game_downloaded".\n' \
-        #                     f'New game not created.\n' \
-        #                     f'Error: {e}'
-        #     print(alert_message)
-        #     admin_alert_thread('Web App - Log', alert_message)
-        #     sys.exit(1)  # Exiting the process.
+        try:
+            serve.delete('game_downloaded')
+        except Exception as e:
+            stack_str = traceback.format_exc()
+            alert_message = f'wp-game-update job\n' \
+                            f'Error thrown while trying to delete file "game_downloaded".\n' \
+                            f'New game not created.\n' \
+                            f'Error stack: \n{stack_str}'
+            print(alert_message)
+            admin_alert_thread('Web App - Log', alert_message)
+            sys.exit(1)  # Exiting the process.
 
         curated_game_data = curate_game_data(START_DEPTH, START_HP)
         export_data = list(curated_game_data[:3])
         export_data.append(START_HP)
         serve.upload(GAME_NAME, export_data)
 
-        game_graph = export_data[0]
+        new_game_graph = export_data[0]
         start_node_index = export_data[1]
         target_node_index = export_data[2]
-        nodes_by_depth = curated_game_data[3]  # todo debug only
+        new_nodes_by_depth = curated_game_data[3]  # Used just for logging below for debugging.
+        print(f'nodes_by_depth: {new_nodes_by_depth}')
         alert_message = f'New wordplay game generated.\n' \
-                        f'Start word: {game_graph[start_node_index][2][0]}\n' \
-                        f'Target word: {game_graph[target_node_index][2][0]}\n' \
-                        f'Synset count: {len(game_graph)}'
+                        f'Start word: {new_game_graph[start_node_index][2][0]}\n' \
+                        f'Target word: {new_game_graph[target_node_index][2][0]}\n' \
+                        f'Synset count: {len(new_game_graph)}'
         print(alert_message)
-        print(f'nodes_by_depth: {nodes_by_depth}')
         admin_alert_thread('Web App - Log', alert_message)
 
     except Exception as e:
-        print(e)
-        admin_alert_thread('Web App - ERROR', f'Error generating new wordplay game.\n{e}')
+        stack_str = traceback.format_exc()
+        message = f'Error generating new wordplay game.\n{stack_str}'
+        admin_alert_thread('Web App - ERROR', message)
+        raise Exception(message)
