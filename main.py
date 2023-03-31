@@ -15,28 +15,6 @@ POINTER_TYPES_TO_IGNORE = {';u', '-u', '<', '<x', '!', '?p'}
 #    usage domains/members, adjective/verb derivations, antonyms, word pivots
 
 
-# testdict = {'a': 1, 'b': 2}
-# try:
-#     x = testdict['c']
-# except Exception as e:
-#     stack_str = traceback.format_exc()
-#     print(f'stack: {stack_str}')
-
-    # stacklist = traceback.format_stack()
-
-    # # Newer Python Version.
-    # exc = sys.exception()
-    # excform = traceback.format_exception(exc)
-
-    # exc_info = sys.exc_info()
-    # excform = traceback.format_exception(None, exc_info, exc_info)
-
-    # print(f'stacklist: {stacklist}')
-    # print(f'excform: {excform}')
-    # print(f'Exception: {e}')
-# sys.exit()
-
-
 with open('wordnet-data-0.pkl', 'rb') as file:
     WORDNET_DATA = pickle.load(file)
 
