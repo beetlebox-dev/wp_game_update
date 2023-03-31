@@ -341,7 +341,7 @@ def curate_game_data(start_depth, start_hp, samples=10):
         if len(synsets_by_depth_wn_index) != analysis_depth + 1:
             print('*****************************')
             frameinfo = getframeinfo(currentframe())
-            print(f'file: {frameinfo.filename} | line: {frameinfo.lineno}')
+            print(f'file: {frameinfo.filename} | line: {frameinfo.lineno + 1}')
             print('The randomly selected target_synset_id could lead to a dead end, which is handled by this block.')
             print(WORDNET_DATA[target_synset_id])
             print(target_synset_id)
@@ -440,8 +440,6 @@ if __name__ == "__main__":
         new_game_graph = export_data[0]
         start_node_index = export_data[1]
         target_node_index = export_data[2]
-        new_nodes_by_depth = curated_game_data[3]  # Used just for logging below for debugging.
-        print(f'nodes_by_depth: {new_nodes_by_depth}')
         alert_message = f'New wordplay game generated.\n' \
                         f'Start word: {new_game_graph[start_node_index][2][0]}\n' \
                         f'Target word: {new_game_graph[target_node_index][2][0]}\n' \
