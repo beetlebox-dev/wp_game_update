@@ -423,13 +423,13 @@ if __name__ == "__main__":
         try:
             serve.delete('game_downloaded')
         except Exception as e:
-            stack_str = traceback.format_exc()
-            alert_message = f'wp-game-update job\n' \
-                            f'Error thrown while trying to delete file "game_downloaded".\n' \
-                            f'New game not created.\n' \
-                            f'Error stack: \n{stack_str}'
-            print(alert_message)
-            admin_alert_thread('Web App - Log', alert_message)
+            # stack_str = traceback.format_exc()
+            # alert_message = f'wp-game-update job\n' \
+            #                 f'Error thrown while trying to delete file "game_downloaded".\n' \
+            #                 f'New game not created.\n' \
+            #                 f'Error stack: \n{stack_str}'
+            # print(alert_message)
+            # admin_alert_thread('Web App - Log', alert_message)
             sys.exit(1)  # Exiting the process.
 
         curated_game_data = curate_game_data(START_DEPTH, START_HP)
