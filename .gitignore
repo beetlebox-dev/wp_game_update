@@ -4,4 +4,6 @@ __pycache__/
 venv/
 cloud_job_tutorial.py
 
-app-storage-bucket/
+wp-game/
+gmail_api_store/
+gmail_api_temp/

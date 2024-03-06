@@ -7,4 +7,5 @@ cloud_job_tutorial.py
 __pycache__/
 venv/
 google/
-app-storage-bucket/
+wp-game/
+gmail_api_store/

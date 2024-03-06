@@ -5,8 +5,12 @@ import sys
 import traceback
 from inspect import currentframe, getframeinfo
 from admin import admin_alert_thread
-from server_retrieval import Serve
+from persist import Serve
 
+
+STORE_BUCKET_NAME = 'app-storage-bucket'
+STORE_TOP_FOLDER = 'wp-game/'
+TEMP_TOP_FOLDER = 'UnUsEd_TeMp_FoLdEr/'
 
 START_DEPTH = 5  # > 1 | DISTANCE BETWEEN start and target, or index of depth that is zero-indexed at target.
 START_HP = 3  # > 0 | Gameplay continues until hp is 0.
@@ -418,24 +422,24 @@ if __name__ == "__main__":
 
     try:
 
-        serve = Serve()
+        serve = Serve(STORE_BUCKET_NAME, STORE_TOP_FOLDER, TEMP_TOP_FOLDER)
 
         try:
-            serve.delete('game_downloaded')
+            serve.delete('game_downloaded', 'store')
         except Exception as e:
-            # stack_str = traceback.format_exc()
-            # alert_message = f'wp-game-update job\n' \
-            #                 f'Error thrown while trying to delete file "game_downloaded".\n' \
-            #                 f'New game not created.\n' \
-            #                 f'Error stack: \n{stack_str}'
-            # print(alert_message)
+            stack_str = traceback.format_exc()
+            alert_message = f'wp-game-update job\n' \
+                            f'Error thrown while trying to delete file "game_downloaded".\n' \
+                            f'New game not created.\n' \
+                            f'Error stack: \n{stack_str}'
+            print(alert_message)
             # admin_alert_thread('Web App - Log', alert_message)
             sys.exit(1)  # Exiting the process.
 
         curated_game_data = curate_game_data(START_DEPTH, START_HP)
         export_data = list(curated_game_data[:3])
         export_data.append(START_HP)
-        serve.upload(GAME_NAME, export_data)
+        serve.send(GAME_NAME, export_data, 'store')
 
         new_game_graph = export_data[0]
         start_node_index = export_data[1]
