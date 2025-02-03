@@ -4,8 +4,8 @@ import statistics
 import sys
 import traceback
 from inspect import currentframe, getframeinfo
-from admin import admin_alert_thread
-from persist import Serve
+from beetlebox.admin import admin_alert_thread
+from beetlebox.persist import Serve
 
 
 STORE_BUCKET_NAME = 'app-storage-bucket'
@@ -427,6 +427,7 @@ if __name__ == "__main__":
         try:
             serve.delete('game_downloaded', 'store')
         except Exception as e:
+            # Presumably, the current game has not been downloaded.No need to generate new game. Exiting process.
             stack_str = traceback.format_exc()
             alert_message = f'wp-game-update job\n' \
                             f'Error thrown while trying to delete file "game_downloaded".\n' \
